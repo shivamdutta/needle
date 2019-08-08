@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Config files
+*.pyc
+*.json
+*.log
+*.csv
+*.out
+
 # Distribution / packaging
 .Python
 build/
@@ -102,3 +109,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
