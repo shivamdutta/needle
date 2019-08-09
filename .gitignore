@@ -12,6 +12,7 @@ __pycache__/
 *.log
 *.csv
 *.out
+*.pkl
 
 # Distribution / packaging
 .Python

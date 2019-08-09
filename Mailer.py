@@ -24,8 +24,8 @@ def load_gmail_service():
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('creds/token.pickle'):
-        with open('creds/token.pickle', 'rb') as token:
+    if os.path.exists('token.pkl'):
+        with open('token.pkl', 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -33,10 +33,10 @@ def load_gmail_service():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'creds/credentials.json', SCOPES)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(host='localhost',port=9090)
         # Save the credentials for the next run
-        with open('creds/token.pickle', 'wb') as token:
+        with open('token.pkl', 'wb') as token:
             pickle.dump(creds, token)
 
     service = build('gmail', 'v1', credentials=creds)
@@ -87,8 +87,8 @@ def send_data(send=True):
     service = load_gmail_service()
 
     if send:
-        message = create_message("cvamdutta@gmail.com", "cvamdutta@gmail.com", "Good Going", "Html data")
-        send_message(service, "me", message)
+        message = create_message("cvamdutta@gmail.com", "cvamdutta@gmail.com, gauravpayal1994@gmail.com", "Needle Test", "Test message")
+        send_message(service, "Shivam", message)
 
 send_data()
 print("Sent")
