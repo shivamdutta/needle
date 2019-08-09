@@ -8,7 +8,7 @@ class LogIn:
     
     def __init__(self):
         with open('config.json') as f:
-            self.config = json.load(f)        
+            self.config = json.load(f)
         self.logger = Logger('trades.log', 'INFO').logging
     
     def return_kite_obj(self):

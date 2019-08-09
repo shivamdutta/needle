@@ -4,6 +4,7 @@ import time
 from selenium.webdriver.chrome.options import Options
 
 from LoggerWrapper import Logger
+from Mailer import Mailer
 
 class Automate:
     
@@ -11,6 +12,7 @@ class Automate:
         with open('config.json') as f:
             self.config = json.load(f)
         self.logger = Logger(self.config['log_filename'], self.config['log_level']).logging
+        self.mailer = Mailer()
         
     def generate_auth(self):
         
@@ -53,9 +55,10 @@ class Automate:
                 json.dump(auth_json, outfile)
                 
             self.logger.info('Generated auth file successfully : {}'.format(auth_json))    
-            
+            self.mailer.send_mail('Needle : Auth Generation Successful', 'Generated auth file successfully : {}'.format(auth_json))
         except Exception as ex:
-            self.logger.error('Could not generate auth file : {}'.format(ex))
+            self.logger.error('Error while generating auth file : {}'.format(ex))
+            self.mailer.send_mail('Needle : Auth Generation Failure', 'Error while generating auth file : {}'.format(ex))
             
         return auth_json
     

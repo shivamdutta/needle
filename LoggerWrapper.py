@@ -14,7 +14,7 @@ class Logger(Singleton):
 
     def __init__(self, log_filename, log_level):
 
-        logging.basicConfig(filename=log_filename, filemode='a', format='%(process)d - %(asctime)s - %(filename)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
+        logging.basicConfig(filename=log_filename, filemode='a', format='%(process)d - %(asctime)s - %(name)s - %(levelname)s - %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
         root = logging.getLogger()
         
         if log_level=='DEBUG':

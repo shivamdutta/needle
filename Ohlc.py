@@ -1,6 +1,7 @@
 import pandas as pd
 
 from LoggerWrapper import Logger
+from Mailer import Mailer
 from LogIn import LogIn
 
 class Ohlc:
@@ -8,6 +9,7 @@ class Ohlc:
     def __init__(self):
         self.logger = Logger('trades.log', 'INFO').logging
         self.kite = LogIn().return_kite_obj()
+        self.mailer = Mailer()
         
     def fetch_current_ohlc(self):
         
@@ -34,10 +36,7 @@ class Ohlc:
             list_of_instruments = list(companies_df['instruments'])
 
         # Generate list of instruments to trade on : End
-
-
-        # Fetch ohlc of list of instruments in chunks and append as kite.ohlc does not give entire data at once : Start
-
+        
         self.logger.debug("Fetching ohlc data for {} companies".format(len(list_of_instruments)))
 
         chunk_size = 50
@@ -62,6 +61,7 @@ class Ohlc:
         self.logger.info("Fetched ohlc data for {} companies : {}".format(len(ohlc_final_df), list(ohlc_final_df['index'])))
         
         if len(list_of_instruments)-len(ohlc_final_df):
-            self.logger.error("Could not fetch ohlc data for {x} companies : {lis}".format(x = len(list_of_instruments)-len(ohlc_final_df), lis = list(set(list_of_instruments) - set(list(ohlc_final_df['index'])))))
-        
+            self.logger.error("Could not fetch ohlc data for {x} out of {y} companies : {lis}".format(x = len(list_of_instruments)-len(ohlc_final_df), y = len(list_of_instruments), lis = list(set(list_of_instruments) - set(list(ohlc_final_df['index'])))))
+            self.mailer.send_mail('Needle : OHLC Fetching Failure', "Could not fetch ohlc data for {x} out of {y} companies : {lis}".format(x = len(list_of_instruments)-len(ohlc_final_df), y = len(list_of_instruments), lis = list(set(list_of_instruments) - set(list(ohlc_final_df['index'])))))
+            
         return ohlc_final_df

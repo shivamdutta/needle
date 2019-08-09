@@ -1,12 +1,14 @@
 import pandas as pd
 
 from LoggerWrapper import Logger
+from Mailer import Mailer
 from Ohlc import Ohlc
 
 class CompareMarket:
     
     def __init__(self):
         self.logger = Logger('trades.log', 'INFO').logging
+        self.mailer = Mailer()
         
     def compare_ohlc(self):
 
@@ -61,16 +63,20 @@ class CompareMarket:
                     to_trade_low.to_csv('companies_low.csv', index=False)
                     
                     self.logger.info("Compared ohlc and saved info about companies to trade")
+                    self.mailer.send_mail('Needle : OHLC Comparison Done Successfully', "OHLC Comparison Table : <br>" + merged_df.to_html() + "Companies for trading (High) : <br>" + to_trade_high.to_html() + "Companies for trading (Low) : <br>" + to_trade_low.to_html())
                     
                 except Exception as ex:
                     self.logger.error("Error while compared ohlc and saving info about companies to trade : {}".format(ex))
+                    self.mailer.send_mail('Needle : OHLC Comparison Failure', "Error while compared ohlc and saving info about companies to trade : {}".format(ex))
                     
             except Exception as ex:
                 self.logger.error("Error in fetching yesterday's ohlc : {}".format(ex))
+                self.mailer.send_mail('Needle : OHLC Comparison Failure', "Error in fetching yesterday's ohlc : {}".format(ex))
                 
         except Exception as ex:
             self.logger.error("Error in fetching today's ohlc : {}".format(ex))
-                
+            self.mailer.send_mail('Needle : OHLC Comparison Failure', "Error in fetching today's ohlc : {}".format(ex))
+            
 if __name__ == "__main__":
     
     CompareMarket().compare_ohlc()

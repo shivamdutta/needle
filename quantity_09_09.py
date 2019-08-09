@@ -1,22 +1,24 @@
 import pandas as pd
 
 from LoggerWrapper import Logger
+from Mailer import Mailer
 
 class Quantity:
     
     def __init__(self):
         self.logger = Logger('trades.log', 'INFO').logging
+        self.mailer = Mailer()
 
     def decide_quantity(self):
         
         try:
-            self.logger.debug('Loading required files')
+            self.logger.debug('Loading required files for calculating quantity')
             companies_high = pd.read_csv('companies_high.csv')
             companies_low = pd.read_csv('companies_low.csv')
             budget = pd.read_csv('leverage.csv')
             quantity_high = pd.read_csv('quantity_high.csv')
             quantity_low = pd.read_csv('quantity_low.csv')
-            self.logger.info('Loaded required files')
+            self.logger.info('Loaded required files for calculating quantity')
             
             try:
                 self.logger.debug('Calculating quantity')
@@ -244,12 +246,15 @@ class Quantity:
 
                 # Update ordering table (low) : End
                 self.logger.info('Calculated quantity')
+                self.mailer.send_mail('Needle : Quantities Calculated Successfully', "Quantity Table (High) : <br>" + quantity_high.to_html() + "Quantity Table (Low) : <br>" + quantity_low.to_html())
                 
             except Exception as ex:
                 self.logger.error('Error in calculating quantity : {}'.format(ex))
+                self.mailer.send_mail('Needle : Quantities Calculation Failure', 'Error in calculating quantity : {}'.format(ex))
                 
         except Exception as ex:
-            self.logger.error('Error in loading required files : {}'.format(ex))                
+            self.logger.error('Error in loading required files for calculating quantity : {}'.format(ex))
+            self.mailer.send_mail('Needle : Quantities Calculation Failure', 'Error in loading required files for calculating quantity : {}'.format(ex))
                 
 if __name__ == "__main__":
     

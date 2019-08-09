@@ -1,16 +1,21 @@
 import pandas as pd
 import time
 from multiprocessing.dummy import Pool as ThreadPool
+import json
 
 from LogIn import LogIn
 from LoggerWrapper import Logger
+from Mailer import Mailer
 
 class PlaceOrderHigh:
     
     def __init__(self):
         self.kite = LogIn().return_kite_obj()
         self.logger = Logger('trades.log', 'INFO').logging
-        
+        self.mailer = Mailer()
+        with open('config.json') as f:
+            self.config = json.load(f)
+            
     def place_order_high(self, company):
 
         record_to_trade = self.quantity_high_to_be_placed[self.quantity_high_to_be_placed['instrument']==company].iloc[0]
@@ -53,54 +58,68 @@ class PlaceOrderHigh:
                 break
             except Exception as ex:
                 retry+=1
-                self.logger.error("Order placement failed: {}".format(ex))
-
+                self.logger.error("Order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                if retry >= num_retries:
+                    self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} (high) : {}".format(tradingsymbol, tag, ex))
+                
         if status_flag:
-            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = order_id
-            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = int(time.time())
+            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = pd.Timestamp.now()+pd.DateOffset(minutes=330)
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'to_be_updated'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
+            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = order_id
         else:
-            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = 'order_failed'
-            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = int(time.time())
+            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = pd.Timestamp.now()+pd.DateOffset(minutes=330)
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'order_failed'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'status'] = 'order_failed'
+            self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = 'order_failed'
             
     def execute(self):
         
         try:
-            self.logger.debug("Loading required files")
+            self.logger.debug("Loading required files for high trades")
             self.quantity_high = pd.read_csv('quantity_high.csv')
             self.quantity_high_to_be_placed = self.quantity_high[self.quantity_high['order_id']=='to_be_placed']
-            self.logger.info("Loaded required files")
+            self.logger.info("Loaded required files for high trades")
             
             try:
                 self.logger.debug("Placing orders (high)")
-                pool = ThreadPool(len(list(set(self.quantity_high_to_be_placed['instrument']))))
-                pool.map(self.place_order_high, list(set(self.quantity_high_to_be_placed['instrument'])))
+                companies_to_trade_high = list(set(self.quantity_high_to_be_placed['instrument']))
+                n_companies_to_trade_high = len(companies_to_trade_high)
+                if n_companies_to_trade_high:
+                    if self.config['multithreading']:
+                        pool = ThreadPool(n_companies_to_trade_high)
+                        pool.map(self.place_order_high, companies_to_trade_high)
+                    else:
+                        for c in companies_to_trade_high:
+                            self.place_order_high(c)
                 self.logger.info("Placed orders (high)")
                                   
                 try:
-                    self.logger.debug("Saving updated files")
+                    self.logger.debug("Saving updated files for high trades")
                     self.quantity_high.to_csv('quantity_high.csv', index=False)
-                    self.logger.info("Saved updated files")
+                    self.logger.info("Saved updated files for high trades")
+                    self.mailer.send_mail('Needle : Orders (High) Placed Successfully', "Quantity Table (High) : <br>" + self.quantity_high.to_html())
+                    
                 except Exception as ex:
-                    self.logger.error("Error in saving updated files : {}".format(ex))
-                
+                    self.logger.error("Error in saving updated files for high trades : {}".format(ex))
+                    self.mailer.send_mail('Needle : Place Order Failure', "Error in saving updated files for high trades : {}".format(ex))
+                    
             except Exception as ex:
                 self.logger.error('Error in placing orders (high) : {}'.format(ex))
-
-        except Exception as ex:
-            self.logger.error('Error in loading required files : {}'.format(ex))                
+                self.mailer.send_mail('Needle : Place Order Failure', "Error in placing orders (high) : {}".format(ex))
                 
+        except Exception as ex:
+            self.logger.error('Error in loading required files for high trades : {}'.format(ex))                
+            self.mailer.send_mail('Needle : Place Order Failure', 'Error in loading required files for high trades : {}'.format(ex))
+            
 if __name__ == "__main__":
     
     PlaceOrderHigh().execute()

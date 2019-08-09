@@ -1,0 +1,14 @@
+{
+    "kite_api_key":"fgfegsgs",
+    "kite_api_secret":"sfsgsgsg",
+    "user_name":"sfsdfgs",
+    "password":"fsdfwf",
+    "pin":"dsfdsff",
+    "auth_filename":"a.json",
+    "log_filename":"trades.log",
+    "log_level":"INFO",
+    "multithreading":false,
+    "send_mails":true,
+    "mail_from":"xyz@domain.com",
+    "mail_to":"xyz@domain.com, abc@domain.com"
+}
