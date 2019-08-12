@@ -37,7 +37,8 @@ class PlaceOrderLow:
             if retry:
                 self.logger.info("Retrying...")                        
             try:
-                order_id = self.kite.place_order(variety=self.kite.VARIETY_BO,
+                try:
+                    order_id = self.kite.place_order(variety=self.kite.VARIETY_BO,
                                             exchange=self.kite.EXCHANGE_NSE,
                                             tradingsymbol=tradingsymbol,
                                             transaction_type=transaction_type,
@@ -52,13 +53,31 @@ class PlaceOrderLow:
                                             stoploss=stoploss,
                                             trailing_stoploss=trailing_stoploss,
                                             tag=tag)
-
+                except Exception as ex:
+                    if str(ex)[0:13]=='Trigger price':
+                        order_id = self.kite.place_order(variety=self.kite.VARIETY_BO,
+                                            exchange=self.kite.EXCHANGE_NSE,
+                                            tradingsymbol=tradingsymbol,
+                                            transaction_type=transaction_type,
+                                            quantity=quantity,
+                                            order_type=self.kite.ORDER_TYPE_LIMIT,
+                                            product=self.kite.PRODUCT_MIS,
+                                            price=price,
+                                            validity=self.kite.VALIDITY_DAY,
+                                            disclosed_quantity=None,
+                                            trigger_price=None,
+                                            squareoff=squareoff,
+                                            stoploss=stoploss,
+                                            trailing_stoploss=trailing_stoploss,
+                                            tag=tag)
+                    else:
+                        raise
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
                 status_flag = True
                 break
             except Exception as ex:
                 retry+=1
-                self.logger.error("Order placement failed: {}".format(ex))
+                self.logger.error("Order placement failed for {} with tag {} (low) : {}".format(tradingsymbol, tag, ex))
                 if retry >= num_retries:
                     self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} (low) : {}".format(tradingsymbol, tag, ex))
                     
