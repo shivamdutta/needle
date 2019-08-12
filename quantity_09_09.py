@@ -32,7 +32,7 @@ class Quantity:
                     last_record = complete_records[(complete_records['trade_number']==complete_records['trade_number'].max())]
 
                     if len(last_record)==0:
-                        print('Trading with company {} for the very first time (high)'.format(company))
+                        self.logger.info('Trading with company {} for the very first time (high)'.format(company))
 
                         instrument = company
                         level = 1
@@ -78,18 +78,17 @@ class Quantity:
 
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_high = quantity_high.append(new_entry, sort=False)
-                        print(quantity_high)
 
                     else:
 
-                        print('Trading with company {ins} with trade_number : {t_no} (high)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
+                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (high)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
                         high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
                         open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
                         daily_khwab = [float(budget[budget['instrument']==company]['return'])*float(budget[budget['instrument']==company]['budget']) if last_record['flag']==1 else 0]
-                        actual_khwab = float(last_record['adhoora_khwab']) + daily_khwab
+                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget']))
                         quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
                         price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
@@ -128,8 +127,8 @@ class Quantity:
 
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_high = quantity_high.append(new_entry, sort=False)
-                        print(quantity_high) 
 
+                print(quantity_high)
                 quantity_high.to_csv('quantity_high.csv', index=False)
 
                 # Update ordering table (high) : End
@@ -144,7 +143,7 @@ class Quantity:
                     last_record = complete_records[(complete_records['trade_number']==complete_records['trade_number'].max())]
 
                     if len(last_record)==0:
-                        print('Trading with company {} for the very first time (low)'.format(company))
+                        self.logger.info('Trading with company {} for the very first time (low)'.format(company))
 
                         instrument = company
                         level = 1
@@ -190,18 +189,17 @@ class Quantity:
 
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_low = quantity_low.append(new_entry, sort=False)
-                        print(quantity_low)
 
                     else:
 
-                        print('Trading with company {ins} with trade_number : {t_no} (low)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
+                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (low)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
                         low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
                         open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
                         daily_khwab = [float(budget[budget['instrument']==company]['return'])*float(budget[budget['instrument']==company]['budget']) if last_record['flag']==1 else 0]
-                        actual_khwab = float(last_record['adhoora_khwab']) + daily_khwab
+                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget']))
                         quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
                         price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
@@ -240,8 +238,8 @@ class Quantity:
 
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_low = quantity_low.append(new_entry, sort=False)
-                        print(quantity_low) 
-
+                        
+                print(quantity_low)
                 quantity_low.to_csv('quantity_low.csv', index=False)
 
                 # Update ordering table (low) : End
