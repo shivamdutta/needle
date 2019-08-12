@@ -90,8 +90,7 @@ class PlaceOrderLow:
         
         try:
             self.logger.debug("Loading required files for low trades")
-            self.quantity_low = pd.read_csv('quantity_low.csv')
-            self.quantity_low_to_be_placed = self.quantity_low[self.quantity_low['order_id']=='to_be_placed']
+            self.quantity_low_to_be_placed = pd.read_csv('quantity_low_to_be_placed.csv')
             self.logger.info("Loaded required files for low trades")
             
             try:
@@ -113,9 +112,12 @@ class PlaceOrderLow:
                 try:
                     self.logger.debug("Saving updated files for low trades")
                     
+                    self.quantity_low = pd.read_csv('quantity_low.csv')
+                    
                     for company in companies_to_trade_low:
                         order_status = orders_df[orders_df['instrument']==company].iloc[0]
                         if order_status['order_id']=='order_failed':
+                            
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
@@ -124,7 +126,18 @@ class PlaceOrderLow:
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'status'] = 'order_failed'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                            
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                            
                         else:
+                            
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
@@ -133,10 +146,20 @@ class PlaceOrderLow:
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
-                        
+                            
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                    
                     self.quantity_low.to_csv('quantity_low.csv', index=False)
+                    self.quantity_low_to_be_placed.to_csv('quantity_low_to_be_placed.csv', index=False)
                     self.logger.info("Saved updated files for low trades")
-                    self.mailer.send_mail('Needle : Orders (Low) Placed Successfully', "Quantity Table (Low) : <br>" + self.quantity_low.to_html())
+                    self.mailer.send_mail('Needle : Orders (Low) Placed Successfully', "Quantity Table (Low) : <br>" + self.quantity_low_to_be_placed.to_html())
                     
                 except Exception as ex:
                     self.logger.error("Error in saving updated files for low trades : {}".format(ex))

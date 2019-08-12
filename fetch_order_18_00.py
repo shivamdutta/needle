@@ -17,6 +17,9 @@ class FetchOrder:
             self.logger.debug("Loading required files for updating P/L status")
             quantity_high = pd.read_csv('quantity_high.csv')
             quantity_low = pd.read_csv('quantity_low.csv')
+            
+            quantity_high_to_be_placed = pd.read_csv('quantity_high_to_be_placed.csv')
+            quantity_low_to_be_placed = pd.read_csv('quantity_low_to_be_placed.csv')
             self.logger.info("Loaded required files for updating P/L status")
             
             try:
@@ -60,28 +63,51 @@ class FetchOrder:
                                 record_to_update['profit_till_now'] = [float(latest_complete_record_company['profit_till_now']) + float(record_to_update['profit']) if len(latest_complete_record_company)==1 else float(record_to_update['profit'])]
 
                                 if high_flag==1:
+                                    
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'pl_tag'] = float(record_to_update['pl_tag'])
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'profit'] = float(record_to_update['profit'])
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'adhoora_khwab'] = float(record_to_update['adhoora_khwab'])
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'flag'] = int(record_to_update['flag'])
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'profit_till_now'] = float(record_to_update['profit_till_now'])
                                     quantity_high.loc[(quantity_high['instrument']=='NSE:'+symbol) & (quantity_high['status']=='to_be_updated'),'status'] = 'complete'
+                                    
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'pl_tag'] = float(record_to_update['pl_tag'])
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'profit'] = float(record_to_update['profit'])
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'adhoora_khwab'] = float(record_to_update['adhoora_khwab'])
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'flag'] = int(record_to_update['flag'])
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'profit_till_now'] = float(record_to_update['profit_till_now'])
+                                    quantity_high_to_be_placed.loc[(quantity_high_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_high_to_be_placed['status']=='to_be_updated'),'status'] = 'complete'
+                                    
                                 else:
+                                    
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'pl_tag'] = float(record_to_update['pl_tag'])
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'profit'] = float(record_to_update['profit'])
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'adhoora_khwab'] = float(record_to_update['adhoora_khwab'])
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'flag'] = int(record_to_update['flag'])
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'profit_till_now'] = float(record_to_update['profit_till_now'])
                                     quantity_low.loc[(quantity_low['instrument']=='NSE:'+symbol) & (quantity_low['status']=='to_be_updated'),'status'] = 'complete'
+                                    
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'pl_tag'] = float(record_to_update['pl_tag'])
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'profit'] = float(record_to_update['profit'])
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'adhoora_khwab'] = float(record_to_update['adhoora_khwab'])
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'flag'] = int(record_to_update['flag'])
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'profit_till_now'] = float(record_to_update['profit_till_now'])
+                                    quantity_low_to_be_placed.loc[(quantity_low_to_be_placed['instrument']=='NSE:'+symbol) & (quantity_low_to_be_placed['status']=='to_be_updated'),'status'] = 'complete'
 
                     quantity_high = quantity_high.replace({'to_be_updated': 'no_trade'})
                     quantity_low = quantity_low.replace({'to_be_updated': 'no_trade'})
 
+                    quantity_high_to_be_placed = quantity_high_to_be_placed.replace({'to_be_updated': 'no_trade'})
+                    quantity_low_to_be_placed = quantity_low_to_be_placed.replace({'to_be_updated': 'no_trade'})
+                    
                     quantity_high.to_csv('quantity_high.csv', index=False)
                     quantity_low.to_csv('quantity_low.csv', index=False)
 
+                    quantity_high_to_be_placed.to_csv('quantity_high_to_be_placed.csv', index=False)
+                    quantity_low_to_be_placed.to_csv('quantity_low_to_be_placed.csv', index=False)
+                    
                     self.logger.info("Updated P/L status of executed orders")
-                    self.mailer.send_mail('Needle : Updated P/L Status Successfully', "Quantity Table (High) : <br>" + quantity_high.to_html() + "Quantity Table (Low) : <br>" + quantity_low.to_html())
+                    self.mailer.send_mail('Needle : Updated P/L Status Successfully', "Quantity Table (High) : <br>" + quantity_high_to_be_placed.to_html() + "Quantity Table (Low) : <br>" + quantity_low_to_be_placed.to_html())
                     
                 except Exception as ex:
                     self.logger.error('Error in updating P/L status of executed orders : {}'.format(ex))

@@ -127,10 +127,7 @@ class Quantity:
 
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_high = quantity_high.append(new_entry, sort=False)
-
-                print(quantity_high)
-                quantity_high.to_csv('quantity_high.csv', index=False)
-
+                        
                 # Update ordering table (high) : End
 
 
@@ -239,13 +236,23 @@ class Quantity:
                         new_entry = pd.DataFrame(data=new_data)
                         quantity_low = quantity_low.append(new_entry, sort=False)
                         
-                print(quantity_low)
-                quantity_low.to_csv('quantity_low.csv', index=False)
-
                 # Update ordering table (low) : End
                 self.logger.info('Calculated quantity')
-                self.mailer.send_mail('Needle : Quantities Calculated Successfully', "Quantity Table (High) : <br>" + quantity_high.to_html() + "Quantity Table (Low) : <br>" + quantity_low.to_html())
                 
+                try:
+                    self.logger.debug('Saving files with updated quantity')
+                    quantity_high.to_csv('quantity_high.csv', index=False)
+                    quantity_low.to_csv('quantity_low.csv', index=False)
+                    quantity_high_to_be_placed = quantity_high[quantity_high['order_id']=='to_be_placed']
+                    quantity_low_to_be_placed = quantity_low[quantity_low['order_id']=='to_be_placed']
+                    quantity_high_to_be_placed.to_csv('quantity_high_to_be_placed.csv', index=False)
+                    quantity_low_to_be_placed.to_csv('quantity_low_to_be_placed.csv', index=False)
+                    self.logger.info('Saved files with updated quantity')
+                    self.mailer.send_mail('Needle : Quantities Calculated Successfully', "Quantity Table (High) : <br>" + quantity_high_to_be_placed.to_html() + "Quantity Table (Low) : <br>" + quantity_low_to_be_placed.to_html())
+                except Exception as ex:
+                    self.logger.error('Error in saving updated files')
+                    self.mailer.send_mail('Needle : Quantities Calculation Failure', 'Error in saving files with updated quantity : {}'.format(ex))
+                    
             except Exception as ex:
                 self.logger.error('Error in calculating quantity : {}'.format(ex))
                 self.mailer.send_mail('Needle : Quantities Calculation Failure', 'Error in calculating quantity : {}'.format(ex))

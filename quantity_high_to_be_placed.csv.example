@@ -1,0 +1,4 @@
+instrument,level,high_prev,open_today,daily_khwab,actual_khwab,quantity,price,trigger_price,squareoff,stoploss,trade_number,pl_tag,profit,adhoora_khwab,flag,profit_till_now,order_id,timestamp,status
+NSE:DCBBANK,1,195.0,195.2,6.0,6.0,2,195.4,195.3,3.9,3.9,1,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed
+NSE:SBIN,1,295.5,296.3,6.0,6.0,1,296.6,296.45,5.9,5.9,1,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed
+NSE:YESBANK,1,89.9,91.8,5.0,5.0,3,91.9,91.85,1.8,1.8,1,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed,to_be_placed

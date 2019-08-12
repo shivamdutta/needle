@@ -90,8 +90,7 @@ class PlaceOrderHigh:
         
         try:
             self.logger.debug("Loading required files for high trades")
-            self.quantity_high = pd.read_csv('quantity_high.csv')
-            self.quantity_high_to_be_placed = self.quantity_high[self.quantity_high['order_id']=='to_be_placed']
+            self.quantity_high_to_be_placed = pd.read_csv('quantity_high_to_be_placed.csv')
             self.logger.info("Loaded required files for high trades")
             
             try:
@@ -113,9 +112,12 @@ class PlaceOrderHigh:
                 try:
                     self.logger.debug("Saving updated files for high trades")
                     
+                    self.quantity_high = pd.read_csv('quantity_high.csv')
+                    
                     for company in companies_to_trade_high:
                         order_status = orders_df[orders_df['instrument']==company].iloc[0]
                         if order_status['order_id']=='order_failed':
+                            
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
@@ -124,7 +126,18 @@ class PlaceOrderHigh:
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'status'] = 'order_failed'
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                            
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'order_failed'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                            
                         else:
+                            
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
@@ -134,9 +147,19 @@ class PlaceOrderHigh:
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
                             self.quantity_high.loc[(self.quantity_high['instrument']==company) & (self.quantity_high['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
+                            self.quantity_high_to_be_placed.loc[(self.quantity_high_to_be_placed['instrument']==company) & (self.quantity_high_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                            
                     self.quantity_high.to_csv('quantity_high.csv', index=False)
+                    self.quantity_high_to_be_placed.to_csv('quantity_high_to_be_placed.csv', index=False)
                     self.logger.info("Saved updated files for high trades")
-                    self.mailer.send_mail('Needle : Orders (High) Placed Successfully', "Quantity Table (High) : <br>" + self.quantity_high.to_html())
+                    self.mailer.send_mail('Needle : Orders (High) Placed Successfully', "Quantity Table (High) : <br>" + self.quantity_high_to_be_placed.to_html())
                     
                 except Exception as ex:
                     self.logger.error("Error in saving updated files for high trades : {}".format(ex))
