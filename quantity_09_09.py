@@ -51,6 +51,7 @@ class Quantity:
                         adhoora_khwab = 'to_be_placed'
                         flag = 'to_be_placed'
                         profit_till_now = 'to_be_placed'
+                        order_type = 'to_be_placed'
                         order_id = 'to_be_placed'
                         timestamp = 'to_be_placed'
                         status = 'to_be_placed'
@@ -72,6 +73,7 @@ class Quantity:
                                     'adhoora_khwab':[adhoora_khwab],
                                     'flag':[flag],
                                     'profit_till_now':[profit_till_now],
+                                    'order_type':[order_type],
                                     'order_id':[order_id],
                                     'timestamp':[timestamp],
                                     'status':[status]}
@@ -100,6 +102,7 @@ class Quantity:
                         adhoora_khwab = 'to_be_placed'
                         flag = 'to_be_placed'
                         profit_till_now = 'to_be_placed'
+                        order_type = 'to_be_placed'
                         order_id = 'to_be_placed'
                         timestamp = 'to_be_placed'
                         status = 'to_be_placed'
@@ -121,6 +124,7 @@ class Quantity:
                                     'adhoora_khwab':[adhoora_khwab],
                                     'flag':[flag],
                                     'profit_till_now':[profit_till_now],
+                                    'order_type':[order_type],
                                     'order_id':[order_id],
                                     'timestamp':[timestamp],
                                     'status':[status]}
@@ -159,6 +163,7 @@ class Quantity:
                         adhoora_khwab = 'to_be_placed'
                         flag = 'to_be_placed'
                         profit_till_now = 'to_be_placed'
+                        order_type = 'to_be_placed'
                         order_id = 'to_be_placed'
                         timestamp = 'to_be_placed'
                         status = 'to_be_placed'
@@ -180,6 +185,7 @@ class Quantity:
                                     'adhoora_khwab':[adhoora_khwab],
                                     'flag':[flag],
                                     'profit_till_now':[profit_till_now],
+                                    'order_type':[order_type],
                                     'order_id':[order_id],
                                     'timestamp':[timestamp],
                                     'status':[status]}
@@ -208,6 +214,7 @@ class Quantity:
                         adhoora_khwab = 'to_be_placed'
                         flag = 'to_be_placed'
                         profit_till_now = 'to_be_placed'
+                        order_type = 'to_be_placed'
                         order_id = 'to_be_placed'
                         timestamp = 'to_be_placed'
                         status = 'to_be_placed'
@@ -229,6 +236,7 @@ class Quantity:
                                     'adhoora_khwab':[adhoora_khwab],
                                     'flag':[flag],
                                     'profit_till_now':[profit_till_now],
+                                    'order_type':[order_type],
                                     'order_id':[order_id],
                                     'timestamp':[timestamp],
                                     'status':[status]}

@@ -109,6 +109,8 @@ class FetchOrder:
                     self.logger.info("Updated P/L status of executed orders")
                     self.mailer.send_mail('Needle : Updated P/L Status Successfully', "Quantity Table (High) : <br>" + quantity_high_to_be_placed.to_html() + "Quantity Table (Low) : <br>" + quantity_low_to_be_placed.to_html())
                     
+                    self.mailer.send_mail('Needle : Cumulative Trades Daily Update', "Quantity Table (High) : <br>" + quantity_high.to_html() + "Quantity Table (Low) : <br>" + quantity_low.to_html())
+                    
                 except Exception as ex:
                     self.logger.error('Error in updating P/L status of executed orders : {}'.format(ex))
                     self.mailer.send_mail('Needle : P/L Status Update Failure', 'Error in updating P/L status of executed orders : {}'.format(ex))

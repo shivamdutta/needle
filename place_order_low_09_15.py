@@ -27,6 +27,7 @@ class PlaceOrderLow:
         tag = '{t_no}:{lev}'.format(t_no = int(record_to_trade['trade_number']), lev = int(record_to_trade['level']))
 
         status_flag = False
+        limit_order_flag = False
         retry = 0
         num_retries = 3
         while status_flag is not True and retry < num_retries:
@@ -66,8 +67,8 @@ class PlaceOrderLow:
                                             stoploss=stoploss,
                                             trailing_stoploss=trailing_stoploss,
                                             tag=tag)
+                        limit_order_flag = True
                         self.logger.warning("LIMIT order placed as SL order placement failed (low) for {} with tag {} : {}".format(tradingsymbol, tag, ex))
-                        self.mailer.send_mail('Needle : Place Order Warning', "LIMIT order placed as SL order placement failed (low) for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                     else:
                         raise
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
@@ -80,9 +81,12 @@ class PlaceOrderLow:
                     self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} (low) : {}".format(tradingsymbol, tag, ex))
                     
         if status_flag:
-            return {'instrument':company, 'order_id':order_id, 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            if limit_order_flag:
+                return {'instrument':company, 'order_id':order_id, 'order_type':'LIMIT', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            else:
+                return {'instrument':company, 'order_id':order_id, 'order_type':'SL', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         else:
-            return {'instrument':company, 'order_id':'order_failed', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            return {'instrument':company, 'order_id':'order_failed', 'order_type':'order_failed', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         
     def execute(self):
         
@@ -124,6 +128,7 @@ class PlaceOrderLow:
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'status'] = 'order_failed'
+                            self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
@@ -133,6 +138,7 @@ class PlaceOrderLow:
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'order_failed'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             
                         else:
@@ -144,6 +150,7 @@ class PlaceOrderLow:
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
+                            self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
                             self.quantity_low.loc[(self.quantity_low['instrument']==company) & (self.quantity_low['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
@@ -153,6 +160,7 @@ class PlaceOrderLow:
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
+                            self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
                             self.quantity_low_to_be_placed.loc[(self.quantity_low_to_be_placed['instrument']==company) & (self.quantity_low_to_be_placed['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                     
                     self.quantity_low.to_csv('quantity_low.csv', index=False)

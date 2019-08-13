@@ -1,4 +1,2 @@
 instrument,last_price_today,open_today,high_today,low_today,close_today,last_price_prev,open_prev,high_prev,low_prev,close_prev
-NSE:DCBBANK,196.3,195.2,197.80,193.25,194.00,194.00,192.00,195.0,189.6,189.65
-NSE:SBIN,291.0,296.3,298.00,290.05,294.35,294.35,290.00,295.5,285.6,289.90
-NSE:YESBANK,82.3,91.8,92.45,81.15,89.20,89.20,89.25,89.9,84.8,86.85
+NSE:DCBBANK,199.9,199.9,199.9,199.9,197.9,197.9,195.2,199.25,193.25,197.9
