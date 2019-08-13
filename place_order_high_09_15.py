@@ -66,6 +66,8 @@ class PlaceOrderHigh:
                                             stoploss=stoploss,
                                             trailing_stoploss=trailing_stoploss,
                                             tag=tag)
+                        self.logger.warning("LIMIT order placed as SL order placement failed (high) for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                        self.mailer.send_mail('Needle : Place Order Warning', "LIMIT order placed as SL order placement failed (high) for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                     else:
                         raise
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
