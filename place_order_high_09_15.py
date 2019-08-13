@@ -1,7 +1,5 @@
 import pandas as pd
-import time
 from multiprocessing.dummy import Pool as ThreadPool
-import json
 
 from LogIn import LogIn
 from LoggerWrapper import Logger
@@ -13,8 +11,6 @@ class PlaceOrderHigh:
         self.kite = LogIn().return_kite_obj()
         self.logger = Logger('trades.log', 'INFO').logging
         self.mailer = Mailer()
-        with open('config.json') as f:
-            self.config = json.load(f)
             
     def place_order_high(self, company):
 
@@ -98,7 +94,8 @@ class PlaceOrderHigh:
                 companies_to_trade_high = list(set(self.quantity_high_to_be_placed['instrument']))
                 n_companies_to_trade_high = len(companies_to_trade_high)
                 if n_companies_to_trade_high:
-                    if self.config['multithreading']:
+                    multithreading = True
+                    if multithreading:
                         pool = ThreadPool(n_companies_to_trade_high)
                         orders = pool.map(self.place_order_high, companies_to_trade_high)
                     else:
