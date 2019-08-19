@@ -17,8 +17,8 @@ Also, a reinforcement mechanism is implemented to counter the losses that might 
 30 2 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 automate.py
 30 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 automate.py
 39 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 data_today_09_09.py && /home/ubuntu/needle/bin/python3 quantity_09_09.py
-45 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 place_order_high_09_15.py
-45 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 place_order_low_09_15.py
+44 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 place_order_high_09_15.py
+44 3 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 place_order_low_09_15.py
 40 9 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 exit_order_03_10.py
 30 12 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 fetch_order_18_00.py
 35 12 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 data_prev_18_00.py

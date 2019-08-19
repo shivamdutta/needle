@@ -1,5 +1,6 @@
 import pandas as pd
 from multiprocessing.dummy import Pool as ThreadPool
+import time
 
 from LogIn import LogIn
 from LoggerWrapper import Logger
@@ -97,6 +98,7 @@ class PlaceOrderLow:
             
             try:
                 self.logger.debug("Placing orders (low)")
+                time.sleep(58)
                 companies_to_trade_low = list(set(self.quantity_low_to_be_placed['instrument']))
                 n_companies_to_trade_low = len(companies_to_trade_low)
                 if n_companies_to_trade_low:
