@@ -15,7 +15,7 @@ class Quantity:
             self.logger.debug('Loading required files for calculating quantity')
             companies_high = pd.read_csv('companies_high.csv')
             companies_low = pd.read_csv('companies_low.csv')
-            budget = pd.read_csv('leverage.csv')
+            budget_df = pd.read_csv('budget.csv')
             quantity_high = pd.read_csv('quantity_high.csv')
             quantity_low = pd.read_csv('quantity_low.csv')
             self.logger.info('Loaded required files for calculating quantity')
@@ -36,15 +36,17 @@ class Quantity:
 
                         instrument = company
                         level = 1
+                        budget = float(budget_df[budget_df['instrument']==company]['budget'])
+                        return_ = float(budget_df[budget_df['instrument']==company]['return'])
                         high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
                         open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        daily_khwab = float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget'])
+                        daily_khwab = return_ * budget
                         actual_khwab = daily_khwab
-                        quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
+                        quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
-                        stoploss = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
+                        squareoff = round(return_ * price, 1)
+                        stoploss = round(return_ * price, 1)
                         trade_number = 1
                         pl_tag = 'to_be_placed'
                         profit = 'to_be_placed'
@@ -58,6 +60,8 @@ class Quantity:
 
                         new_data = {'instrument':[instrument],
                                     'level':[level],
+                                    'budget':[budget],
+                                    'return':[return_],
                                     'high_prev':[high_prev],
                                     'open_today':[open_today],
                                     'daily_khwab':[daily_khwab],
@@ -87,15 +91,17 @@ class Quantity:
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
+                        budget = [float(budget_df[budget_df['instrument']==company]['budget']) if level==1 else float(last_record['budget'])]
+                        return_ = [float(budget_df[budget_df['instrument']==company]['return']) if level==1 else float(last_record['return'])]
                         high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
                         open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        daily_khwab = [float(budget[budget['instrument']==company]['return'])*float(budget[budget['instrument']==company]['budget']) if last_record['flag']==1 else 0]
-                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget']))
-                        quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
+                        daily_khwab = [(return_ * budget) if last_record['flag']==1 else 0]
+                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, (return_ * budget))
+                        quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
-                        stoploss = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
+                        squareoff = round(return_ * price, 1)
+                        stoploss = round(return_ * price, 1)
                         trade_number = int(last_record['trade_number'])+1
                         pl_tag = 'to_be_placed'
                         profit = 'to_be_placed'
@@ -109,6 +115,8 @@ class Quantity:
 
                         new_data = {'instrument':[instrument],
                                     'level':[level],
+                                    'budget':[budget],
+                                    'return':[return_],
                                     'high_prev':[high_prev],
                                     'open_today':[open_today],
                                     'daily_khwab':[daily_khwab],
@@ -148,15 +156,17 @@ class Quantity:
 
                         instrument = company
                         level = 1
+                        budget = float(budget_df[budget_df['instrument']==company]['budget'])
+                        return_ = float(budget_df[budget_df['instrument']==company]['return'])
                         low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
                         open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        daily_khwab = float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget'])
+                        daily_khwab = return_ * budget
                         actual_khwab = daily_khwab
-                        quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
+                        quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
-                        stoploss = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
+                        squareoff = round(return_ * price, 1)
+                        stoploss = round(return_ * price, 1)
                         trade_number = 1
                         pl_tag = 'to_be_placed'
                         profit = 'to_be_placed'
@@ -170,6 +180,8 @@ class Quantity:
 
                         new_data = {'instrument':[instrument],
                                     'level':[level],
+                                    'budget':[budget],
+                                    'return':[return_],
                                     'low_prev':[low_prev],
                                     'open_today':[open_today],
                                     'daily_khwab':[daily_khwab],
@@ -199,15 +211,17 @@ class Quantity:
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
+                        budget = [float(budget_df[budget_df['instrument']==company]['budget']) if level==1 else float(last_record['budget'])]
+                        return_ = [float(budget_df[budget_df['instrument']==company]['return']) if level==1 else float(last_record['return'])]
                         low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
                         open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        daily_khwab = [float(budget[budget['instrument']==company]['return'])*float(budget[budget['instrument']==company]['budget']) if last_record['flag']==1 else 0]
-                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, float(budget[budget['instrument']==company]['return']) * float(budget[budget['instrument']==company]['budget']))
-                        quantity = round(actual_khwab/(float(budget[budget['instrument']==company]['return']) * open_today))
+                        daily_khwab = [(return_ * budget) if last_record['flag']==1 else 0]
+                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, (return_ * budget))
+                        quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
-                        stoploss = round((float(budget[budget['instrument']==company]['return'])) * price, 1)
+                        squareoff = round(return_ * price, 1)
+                        stoploss = round(return_ * price, 1)
                         trade_number = int(last_record['trade_number'])+1
                         pl_tag = 'to_be_placed'
                         profit = 'to_be_placed'
@@ -221,6 +235,8 @@ class Quantity:
 
                         new_data = {'instrument':[instrument],
                                     'level':[level],
+                                    'budget':[budget],
+                                    'return':[return_],
                                     'low_prev':[low_prev],
                                     'open_today':[open_today],
                                     'daily_khwab':[daily_khwab],

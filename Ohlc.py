@@ -11,13 +11,13 @@ class Ohlc:
         self.kite = LogIn().return_kite_obj()
         self.mailer = Mailer()
         
-    def fetch_current_ohlc(self, leverage_companies_only = True):
+    def fetch_current_ohlc(self, selected_companies_only = True):
         
         # Generate list of instruments to trade on : Start
         
-        if leverage_companies_only:
-            leverage_df = pd.read_csv('leverage.csv')
-            list_of_instruments = list(leverage_df['instrument'])
+        if selected_companies_only:
+            budget = pd.read_csv('budget.csv')
+            list_of_instruments = list(budget['instrument'])
         else:
 
             try:
