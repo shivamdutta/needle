@@ -1,1 +1,1 @@
-instrument,level,low_prev,open_today,daily_khwab,actual_khwab,quantity,price,trigger_price,squareoff,stoploss,trade_number,pl_tag,profit,adhoora_khwab,flag,profit_till_now,order_id,timestamp,status
+instrument,level,budget,return,low_prev,open_today,daily_khwab,actual_khwab,quantity,price,trigger_price,squareoff,stoploss,trade_number,pl_tag,profit,adhoora_khwab,flag,profit_till_now,order_id,timestamp,status
