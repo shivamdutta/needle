@@ -40,8 +40,8 @@ class Quantity:
                         return_ = float(budget_df[budget_df['instrument']==company]['return'])
                         high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
                         open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        daily_khwab = return_ * budget
-                        actual_khwab = daily_khwab
+                        daily_khwab = round(return_ * budget, 2)
+                        actual_khwab = round(daily_khwab, 2)
                         quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
@@ -87,7 +87,7 @@ class Quantity:
 
                     else:
 
-                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (high)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
+                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (high)'.format(ins=company, t_no=int(last_record['trade_number'])+1))
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
@@ -95,8 +95,8 @@ class Quantity:
                         return_ = [float(budget_df[budget_df['instrument']==company]['return']) if level==1 else float(last_record['return'])]
                         high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
                         open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        daily_khwab = [(return_ * budget) if last_record['flag']==1 else 0]
-                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, (return_ * budget))
+                        daily_khwab = [round(return_ * budget, 2) if last_record['flag']==1 else 0]
+                        actual_khwab = max(round(float(last_record['adhoora_khwab']) + daily_khwab, 2), round(return_ * budget, 2))
                         quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
@@ -160,8 +160,8 @@ class Quantity:
                         return_ = float(budget_df[budget_df['instrument']==company]['return'])
                         low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
                         open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        daily_khwab = return_ * budget
-                        actual_khwab = daily_khwab
+                        daily_khwab = round(return_ * budget, 2)
+                        actual_khwab = round(daily_khwab, 2)
                         quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
@@ -207,7 +207,7 @@ class Quantity:
 
                     else:
 
-                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (low)'.format(ins=company,t_no=int(last_record['trade_number'])+1))
+                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (low)'.format(ins=company, t_no=int(last_record['trade_number'])+1))
 
                         instrument = company
                         level = [1 if int(last_record['pl_tag'])==1 else int(last_record['level'])+1]
@@ -215,8 +215,8 @@ class Quantity:
                         return_ = [float(budget_df[budget_df['instrument']==company]['return']) if level==1 else float(last_record['return'])]
                         low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
                         open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        daily_khwab = [(return_ * budget) if last_record['flag']==1 else 0]
-                        actual_khwab = max(float(last_record['adhoora_khwab']) + daily_khwab, (return_ * budget))
+                        daily_khwab = [round(return_ * budget, 2) if last_record['flag']==1 else 0]
+                        actual_khwab = max(round(float(last_record['adhoora_khwab']) + daily_khwab, 2), round(return_ * budget, 2))
                         quantity = round(actual_khwab/(return_ * open_today))
                         price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
                         trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)

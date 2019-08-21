@@ -49,7 +49,7 @@ class FetchOrder:
                                 record_to_update['status'] = 'complete'
                                 record_to_update['pl_tag'] = round(round(float(pnl), 2) / (float(record_to_update['squareoff']) * float(record_to_update['quantity'])), 1)
                                 record_to_update['profit'] = round(float(pnl), 2)
-                                record_to_update['adhoora_khwab'] = float(record_to_update['actual_khwab']) - float(record_to_update['profit'])
+                                record_to_update['adhoora_khwab'] = round(float(record_to_update['actual_khwab']) - float(record_to_update['profit']), 2)
                                 record_to_update['flag'] = [1 if abs(float(record_to_update['pl_tag']))==1 else 0]
 
                                 if high_flag==1:
@@ -60,7 +60,7 @@ class FetchOrder:
 
                                 latest_complete_record_company = previous_complete_records_company[previous_complete_records_company['trade_number']==previous_complete_records_company['trade_number'].max()]
 
-                                record_to_update['profit_till_now'] = [float(latest_complete_record_company['profit_till_now']) + float(record_to_update['profit']) if len(latest_complete_record_company)==1 else float(record_to_update['profit'])]
+                                record_to_update['profit_till_now'] = [round(float(latest_complete_record_company['profit_till_now']) + float(record_to_update['profit']), 2) if len(latest_complete_record_company)==1 else float(record_to_update['profit'])]
 
                                 if high_flag==1:
                                     
