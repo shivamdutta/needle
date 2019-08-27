@@ -28,9 +28,9 @@ class Quantity:
                 for index, row in trades_today.iterrows():
                     
                     try:
-                        self.logger.debug('Calculating quantity for trading in {} : {}'.format(row['instrument']))
+                        self.logger.debug('Calculating quantity for trading in {}'.format(row['instrument']))
                         
-                        last_valid_trade = all_trades[(all_trades['instrument']==row['instrument']) & (all_trades['condition']==row['condition']) & (all_trades['status']==row['complete']) & (all_trades['trade_number']==all_trades['trade_number'].max())]
+                        last_valid_trade = all_trades[(all_trades['instrument']==row['instrument']) & (all_trades['condition']==row['condition']) & (all_trades['status']=='complete') & (all_trades['trade_number']==all_trades['trade_number'].max())]
                         
                         # Calculate trade number
                         if len(last_valid_trade):
@@ -49,8 +49,8 @@ class Quantity:
                             
                         # Calculate budget and return
                         if level==1:
-                            budget = float(budget_df[budget_df['instrument']==company]['budget'])
-                            return_ = float(budget_df[budget_df['instrument']==company]['return'])
+                            budget = float(budget_df[budget_df['instrument']==row['instrument']]['budget'])
+                            return_ = float(budget_df[budget_df['instrument']==row['instrument']]['return'])
                         else:
                             budget = float(last_valid_trade['budget'])
                             return_ = float(last_valid_trade['return'])
@@ -77,12 +77,12 @@ class Quantity:
                         budget_required = round(quantity * row['open_today'], 2)
                         
                         # Calculate price and trigger price
-                        if row['condition'] = 'high':
-                            price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                            trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
+                        if row['condition']=='high':
+                            price = round(row['open_today'] + 0.05 * max(round(20 * 0.0010 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] + 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
                         else:
-                            price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                            trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
+                            price = round(row['open_today'] - 0.05 * max(round(20 * 0.0010 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] - 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
                             
                         # Calculate square off and stoploss
                         squareoff = round(return_ * price, 1)
@@ -103,7 +103,7 @@ class Quantity:
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'budget'] = budget
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'return_'] = return_
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'return'] = return_
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'daily_khwab'] = daily_khwab
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'actual_khwab'] = actual_khwab
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'quantity'] = quantity
@@ -121,7 +121,7 @@ class Quantity:
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'flag'] = flag
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'adhoora_khwab'] = adhoora_khwab
                         
-                        self.logger.info('Calculated quantity for trading in {} : {}'.format(row['instrument']))
+                        self.logger.info('Calculated quantity for trading in {}'.format(row['instrument']))
                     except Exception as ex:
                         self.logger.error('Error in calculating quantity for trading in {} : {}'.format(row['instrument'], ex))
 
