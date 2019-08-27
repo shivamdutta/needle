@@ -135,7 +135,6 @@ class PlaceOrder:
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'order_failed'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'profit_till_now'] = 'order_failed'
                             
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             
@@ -148,7 +147,6 @@ class PlaceOrder:
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'to_be_updated'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'profit_till_now'] = 'to_be_updated'
                             
                             self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
                             

@@ -99,7 +99,6 @@ class Quantity:
                         pl_tag = 'to_be_placed'
                         flag = 'to_be_placed'
                         adhoora_khwab = 'to_be_placed'
-                        profit_till_now = 'to_be_placed'
                         
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
@@ -121,7 +120,6 @@ class Quantity:
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'pl_tag'] = pl_tag
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'flag'] = flag
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'adhoora_khwab'] = adhoora_khwab
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'profit_till_now'] = profit_till_now
                         
                         self.logger.info('Calculated quantity for trading in {} : {}'.format(row['instrument']))
                     except Exception as ex:

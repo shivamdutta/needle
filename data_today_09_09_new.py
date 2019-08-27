@@ -41,7 +41,7 @@ class CompareMarket:
                     trades_today = to_trade_high.append(to_trade_low, ignore_index=True)
                     trades_today = trades_today[['instrument','high_prev','low_prev','open_today','condition','transaction_type']]
 
-                    header_list = ['instrument', 'high_prev', 'low_prev', 'open_today', 'condition', 'transaction_type', 'trade_number', 'level', 'budget', 'return', 'daily_khwab', 'actual_khwab', 'quantity', 'budget_required', 'price', 'trigger_price', 'squareoff', 'stoploss', 'order_id', 'timestamp', 'order_type', 'status', 'profit', 'pl_tag', 'flag', 'adhoora_khwab', 'profit_till_now']
+                    header_list = ['instrument', 'high_prev', 'low_prev', 'open_today', 'condition', 'transaction_type', 'trade_number', 'level', 'budget', 'return', 'daily_khwab', 'actual_khwab', 'quantity', 'budget_required', 'price', 'trigger_price', 'squareoff', 'stoploss', 'order_id', 'timestamp', 'order_type', 'status', 'profit', 'pl_tag', 'flag', 'adhoora_khwab']
                     
                     trades_today = trades_today.reindex(columns = header_list)  
                     trades_today.to_csv('trades_today.csv', index=False)
