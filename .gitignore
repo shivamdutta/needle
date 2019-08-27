@@ -10,7 +10,6 @@ __pycache__/
 *.pyc
 *.json
 *.log
-*.csv
 *.out
 *.pkl
 

@@ -1,4 +1,5 @@
 import pandas as pd
+import os.path
 
 from LoggerWrapper import Logger
 from Mailer import Mailer
@@ -13,293 +14,124 @@ class Quantity:
         
         try:
             self.logger.debug('Loading required files for calculating quantity')
-            companies_high = pd.read_csv('companies_high.csv')
-            companies_low = pd.read_csv('companies_low.csv')
+            trades_today = pd.read_csv('trades_today.csv')
             budget_df = pd.read_csv('budget.csv')
-            quantity_high = pd.read_csv('quantity_high.csv')
-            quantity_low = pd.read_csv('quantity_low.csv')
+            if os.path.exists('all_trades.csv'):
+                all_trades = pd.read_csv('all_trades.csv')
+            else:
+                all_trades = pd.DataFrame(columns=trades_today.columns)
             self.logger.info('Loaded required files for calculating quantity')
             
             try:
                 self.logger.debug('Calculating quantity')
                 
-                # Update ordering table (high) : Start
+                for index, row in trades_today.iterrows():
+                    
+                    try:
+                        self.logger.debug('Calculating quantity for trading in {}'.format(row['instrument']))
+                        
+                        last_valid_trade = all_trades[(all_trades['instrument']==row['instrument']) & (all_trades['condition']==row['condition']) & (all_trades['status']=='complete') & (all_trades['trade_number']==all_trades['trade_number'].max())]
+                        
+                        # Calculate trade number
+                        if len(last_valid_trade):
+                            trade_number = int(last_valid_trade['trade_number']) + 1
+                        else:
+                            trade_number = 1
 
-                for company in list(companies_high['instrument']):
-
-                    previous_records = quantity_high[(quantity_high['instrument']==company)]
-                    complete_records = previous_records[(previous_records['status']=='complete')]
-                    last_record = complete_records[(complete_records['trade_number']==complete_records['trade_number'].max())]
-
-                    if len(last_record)==0:
-                        self.logger.info('Trading with company {} for the very first time (high)'.format(company))
-
-                        instrument = company
-                        level = 1
-                        budget = float(budget_df[budget_df['instrument']==company]['budget'])
-                        return_ = float(budget_df[budget_df['instrument']==company]['return'])
-                        high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
-                        open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        daily_khwab = round(return_ * budget, 2)
-                        actual_khwab = round(daily_khwab, 2)
-                        quantity = round(actual_khwab/(return_ * open_today))
-                        price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                        trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round(return_ * price, 1)
-                        stoploss = round(return_ * price, 1)
-                        trade_number = 1
-                        pl_tag = 'to_be_placed'
-                        profit = 'to_be_placed'
-                        adhoora_khwab = 'to_be_placed'
-                        flag = 'to_be_placed'
-                        profit_till_now = 'to_be_placed'
-                        order_type = 'to_be_placed'
-                        order_id = 'to_be_placed'
-                        timestamp = 'to_be_placed'
-                        status = 'to_be_placed'
-
-                        new_data = {'instrument':[instrument],
-                                    'level':[level],
-                                    'budget':[budget],
-                                    'return':[return_],
-                                    'high_prev':[high_prev],
-                                    'open_today':[open_today],
-                                    'daily_khwab':[daily_khwab],
-                                    'actual_khwab':[actual_khwab],
-                                    'quantity':[quantity],
-                                    'price':[price],
-                                    'trigger_price':[trigger_price],
-                                    'squareoff':[squareoff],
-                                    'stoploss':[stoploss],
-                                    'trade_number':[trade_number],
-                                    'pl_tag':[pl_tag],
-                                    'profit':[profit],
-                                    'adhoora_khwab':[adhoora_khwab],
-                                    'flag':[flag],
-                                    'profit_till_now':[profit_till_now],
-                                    'order_type':[order_type],
-                                    'order_id':[order_id],
-                                    'timestamp':[timestamp],
-                                    'status':[status]}
-
-                        new_entry = pd.DataFrame(data=new_data)
-                        quantity_high = quantity_high.append(new_entry, sort=False)
-
-                    else:
-
-                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (high)'.format(ins=company, t_no=int(last_record['trade_number'])+1))
-
-                        instrument = company
-                        if float(last_record['pl_tag'])==1.0:
+                        # Calculate level
+                        if len(last_valid_trade):
+                            if float(last_valid_trade['pl_tag'])==1.0:
+                                level = 1
+                            else:
+                                level = float(last_valid_trade['level']) + 1
+                        else:
                             level = 1
-                        else:
-                            level = int(last_record['level'])+1
-                        
+                            
+                        # Calculate budget and return
                         if level==1:
-                            budget = float(budget_df[budget_df['instrument']==company]['budget'])
-                            return_ = float(budget_df[budget_df['instrument']==company]['return'])
+                            budget = float(budget_df[budget_df['instrument']==row['instrument']]['budget'])
+                            return_ = float(budget_df[budget_df['instrument']==row['instrument']]['return'])
                         else:
-                            budget = float(last_record['budget'])
-                            return_ = float(last_record['return'])
+                            budget = float(last_valid_trade['budget'])
+                            return_ = float(last_valid_trade['return'])
                             
-                        high_prev = float(companies_high[companies_high['instrument']==company]['high_prev'])
-                        open_today = float(companies_high[companies_high['instrument']==company]['open_today'])
-                        
-                        if int(last_record['flag'])==1:
+                        # Calculate daily khwab
+                        if len(last_valid_trade):
+                            if int(last_valid_trade['flag'])==1:
+                                daily_khwab = round(return_ * budget, 2)
+                            else:
+                                daily_khwab = 0
+                        else:
                             daily_khwab = round(return_ * budget, 2)
-                        else:
-                            daily_khwab = 0
                             
-                        actual_khwab = max(round(float(last_record['adhoora_khwab']) + daily_khwab, 2), round(return_ * budget, 2))
-                        quantity = round(actual_khwab/(return_ * open_today))
-                        price = round(open_today + 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                        trigger_price = round(open_today + 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
+                        # Calculate actual khwab
+                        if len(last_valid_trade):
+                            actual_khwab = max(round(float(last_valid_trade['adhoora_khwab']) + daily_khwab, 2), round(return_ * budget, 2))
+                        else:
+                            actual_khwab = round(return_ * budget, 2)
+                            
+                        # Calculate quantity
+                        quantity = round(actual_khwab/(return_ * row['open_today']))
+                        
+                        # Calculate budget required
+                        budget_required = round(quantity * row['open_today'], 2)
+                        
+                        # Calculate price and trigger price
+                        if row['condition']=='high':
+                            price = round(row['open_today'] + 0.05 * max(round(20 * 0.0010 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] + 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
+                        else:
+                            price = round(row['open_today'] - 0.05 * max(round(20 * 0.0010 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] - 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
+                            
+                        # Calculate square off and stoploss
                         squareoff = round(return_ * price, 1)
                         stoploss = round(return_ * price, 1)
-                        trade_number = int(last_record['trade_number'])+1
-                        pl_tag = 'to_be_placed'
-                        profit = 'to_be_placed'
-                        adhoora_khwab = 'to_be_placed'
-                        flag = 'to_be_placed'
-                        profit_till_now = 'to_be_placed'
-                        order_type = 'to_be_placed'
+                        
+                        # To be updated after placing orders
                         order_id = 'to_be_placed'
                         timestamp = 'to_be_placed'
-                        status = 'to_be_placed'
-
-                        new_data = {'instrument':[instrument],
-                                    'level':[level],
-                                    'budget':[budget],
-                                    'return':[return_],
-                                    'high_prev':[high_prev],
-                                    'open_today':[open_today],
-                                    'daily_khwab':[daily_khwab],
-                                    'actual_khwab':[actual_khwab],
-                                    'quantity':[quantity],
-                                    'price':[price],
-                                    'trigger_price':[trigger_price],
-                                    'squareoff':[squareoff],
-                                    'stoploss':[stoploss],
-                                    'trade_number':[trade_number],
-                                    'pl_tag':[pl_tag],
-                                    'profit':[profit],
-                                    'adhoora_khwab':[adhoora_khwab],
-                                    'flag':[flag],
-                                    'profit_till_now':[profit_till_now],
-                                    'order_type':[order_type],
-                                    'order_id':[order_id],
-                                    'timestamp':[timestamp],
-                                    'status':[status]}
-
-                        new_entry = pd.DataFrame(data=new_data)
-                        quantity_high = quantity_high.append(new_entry, sort=False)
-                        
-                # Update ordering table (high) : End
-
-
-                # Update ordering table (low) : Start
-
-                for company in list(companies_low['instrument']):
-
-                    previous_records = quantity_low[(quantity_low['instrument']==company)]
-                    complete_records = previous_records[(previous_records['status']=='complete')]
-                    last_record = complete_records[(complete_records['trade_number']==complete_records['trade_number'].max())]
-
-                    if len(last_record)==0:
-                        self.logger.info('Trading with company {} for the very first time (low)'.format(company))
-
-                        instrument = company
-                        level = 1
-                        budget = float(budget_df[budget_df['instrument']==company]['budget'])
-                        return_ = float(budget_df[budget_df['instrument']==company]['return'])
-                        low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
-                        open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        daily_khwab = round(return_ * budget, 2)
-                        actual_khwab = round(daily_khwab, 2)
-                        quantity = round(actual_khwab/(return_ * open_today))
-                        price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                        trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round(return_ * price, 1)
-                        stoploss = round(return_ * price, 1)
-                        trade_number = 1
-                        pl_tag = 'to_be_placed'
-                        profit = 'to_be_placed'
-                        adhoora_khwab = 'to_be_placed'
-                        flag = 'to_be_placed'
-                        profit_till_now = 'to_be_placed'
                         order_type = 'to_be_placed'
-                        order_id = 'to_be_placed'
-                        timestamp = 'to_be_placed'
+                        
+                        # To be updated after fetching order status
                         status = 'to_be_placed'
-
-                        new_data = {'instrument':[instrument],
-                                    'level':[level],
-                                    'budget':[budget],
-                                    'return':[return_],
-                                    'low_prev':[low_prev],
-                                    'open_today':[open_today],
-                                    'daily_khwab':[daily_khwab],
-                                    'actual_khwab':[actual_khwab],
-                                    'quantity':[quantity],
-                                    'price':[price],
-                                    'trigger_price':[trigger_price],
-                                    'squareoff':[squareoff],
-                                    'stoploss':[stoploss],
-                                    'trade_number':[trade_number],
-                                    'pl_tag':[pl_tag],
-                                    'profit':[profit],
-                                    'adhoora_khwab':[adhoora_khwab],
-                                    'flag':[flag],
-                                    'profit_till_now':[profit_till_now],
-                                    'order_type':[order_type],
-                                    'order_id':[order_id],
-                                    'timestamp':[timestamp],
-                                    'status':[status]}
-
-                        new_entry = pd.DataFrame(data=new_data)
-                        quantity_low = quantity_low.append(new_entry, sort=False)
-
-                    else:
-
-                        self.logger.info('Trading with company {ins} with trade_number : {t_no} (low)'.format(ins=company, t_no=int(last_record['trade_number'])+1))
-                        instrument = company
-                        if float(last_record['pl_tag'])==1.0:
-                            level = 1
-                        else:
-                            level = int(last_record['level'])+1
-                        
-                        if level==1:
-                            budget = float(budget_df[budget_df['instrument']==company]['budget'])
-                            return_ = float(budget_df[budget_df['instrument']==company]['return'])
-                        else:
-                            budget = float(last_record['budget'])
-                            return_ = float(last_record['return'])
-                            
-                        low_prev = float(companies_low[companies_low['instrument']==company]['low_prev'])
-                        open_today = float(companies_low[companies_low['instrument']==company]['open_today'])
-                        
-                        if int(last_record['flag'])==1:
-                            daily_khwab = round(return_ * budget, 2)
-                        else:
-                            daily_khwab = 0
-                            
-                        actual_khwab = max(round(float(last_record['adhoora_khwab']) + daily_khwab, 2), round(return_ * budget, 2))
-                        quantity = round(actual_khwab/(return_ * open_today))
-                        price = round(open_today - 0.05 * max(round(20 * 0.0010 * open_today), 2), 2)
-                        trigger_price = round(open_today - 0.05 * max(round(20 * 0.0005 * open_today),1), 2)
-                        squareoff = round(return_ * price, 1)
-                        stoploss = round(return_ * price, 1)
-                        trade_number = int(last_record['trade_number'])+1
-                        pl_tag = 'to_be_placed'
                         profit = 'to_be_placed'
-                        adhoora_khwab = 'to_be_placed'
+                        pl_tag = 'to_be_placed'
                         flag = 'to_be_placed'
-                        profit_till_now = 'to_be_placed'
-                        order_type = 'to_be_placed'
-                        order_id = 'to_be_placed'
-                        timestamp = 'to_be_placed'
-                        status = 'to_be_placed'
-
-                        new_data = {'instrument':[instrument],
-                                    'level':[level],
-                                    'budget':[budget],
-                                    'return':[return_],
-                                    'low_prev':[low_prev],
-                                    'open_today':[open_today],
-                                    'daily_khwab':[daily_khwab],
-                                    'actual_khwab':[actual_khwab],
-                                    'quantity':[quantity],
-                                    'price':[price],
-                                    'trigger_price':[trigger_price],
-                                    'squareoff':[squareoff],
-                                    'stoploss':[stoploss],
-                                    'trade_number':[trade_number],
-                                    'pl_tag':[pl_tag],
-                                    'profit':[profit],
-                                    'adhoora_khwab':[adhoora_khwab],
-                                    'flag':[flag],
-                                    'profit_till_now':[profit_till_now],
-                                    'order_type':[order_type],
-                                    'order_id':[order_id],
-                                    'timestamp':[timestamp],
-                                    'status':[status]}
-
-                        new_entry = pd.DataFrame(data=new_data)
-                        quantity_low = quantity_low.append(new_entry, sort=False)
+                        adhoora_khwab = 'to_be_placed'
                         
-                # Update ordering table (low) : End
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'budget'] = budget
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'return'] = return_
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'daily_khwab'] = daily_khwab
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'actual_khwab'] = actual_khwab
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'quantity'] = quantity
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'budget_required'] = budget_required
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'price'] = price
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'trigger_price'] = trigger_price
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'squareoff'] = squareoff
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'stoploss'] = stoploss
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'order_id'] = order_id
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'timestamp'] = timestamp
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'order_type'] = order_type
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'status'] = status
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'profit'] = profit
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'pl_tag'] = pl_tag
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'flag'] = flag
+                        trades_today.loc[trades_today['instrument']==row['instrument'], 'adhoora_khwab'] = adhoora_khwab
+                        
+                        self.logger.info('Calculated quantity for trading in {}'.format(row['instrument']))
+                    except Exception as ex:
+                        self.logger.error('Error in calculating quantity for trading in {} : {}'.format(row['instrument'], ex))
+
                 self.logger.info('Calculated quantity')
                 
                 try:
                     self.logger.debug('Saving files with updated quantity')
-                    quantity_high.to_csv('quantity_high.csv', index=False)
-                    quantity_low.to_csv('quantity_low.csv', index=False)
-                    quantity_high_to_be_placed = quantity_high[quantity_high['order_id']=='to_be_placed']
-                    quantity_low_to_be_placed = quantity_low[quantity_low['order_id']=='to_be_placed']
-                    quantity_high_to_be_placed.to_csv('quantity_high_to_be_placed.csv', index=False)
-                    quantity_low_to_be_placed.to_csv('quantity_low_to_be_placed.csv', index=False)
+                    trades_today.to_csv('trades_today.csv', index=False)
                     self.logger.info('Saved files with updated quantity')
-                    self.mailer.send_mail('Needle : Quantities Calculated Successfully', "Quantity Table (High) : <br>" + quantity_high_to_be_placed.to_html() + "Quantity Table (Low) : <br>" + quantity_low_to_be_placed.to_html())
+                    self.mailer.send_mail('Needle : Quantities Calculated Successfully', "Trades Today : <br>" + trades_today.to_html())
                 except Exception as ex:
                     self.logger.error('Error in saving updated files')
                     self.mailer.send_mail('Needle : Quantities Calculation Failure', 'Error in saving files with updated quantity : {}'.format(ex))

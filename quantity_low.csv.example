@@ -1,3 +1,0 @@
-instrument,level,budget,return,low_prev,open_today,daily_khwab,actual_khwab,quantity,price,trigger_price,squareoff,stoploss,trade_number,pl_tag,profit,adhoora_khwab,flag,profit_till_now,order_id,timestamp,status,order_type
-NSE:PETRONET,1,400,0.02,240.6,238.7,8.0,8.0,2,238.45,238.6,4.8,4.8,1,0.1,1.2,6.8,0,1.2,190819000043318,2019-08-19 09:15:03.604159,complete,SL
-NSE:UJJIVAN,1,400,0.02,275.1,260.0,8.0,8.0,2,259.75,259.85,5.2,5.2,1,no_trade,no_trade,no_trade,no_trade,no_trade,190819000043329,2019-08-19 09:15:03.609818,no_trade,SL

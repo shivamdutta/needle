@@ -1,4 +1,5 @@
 import pandas as pd
+import os.path
 
 from LoggerWrapper import Logger
 from Mailer import Mailer
@@ -18,7 +19,7 @@ class UpdateTrades:
             if os.path.exists('all_trades.csv'):
                 all_trades = pd.read_csv('all_trades.csv')
             else:
-                all_trades = pd.DataFrame().reindex_like(trades_today)
+                all_trades = pd.DataFrame(columns=trades_today.columns)
             self.logger.info("Loaded required files for updating trades")
             
             try:
