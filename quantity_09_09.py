@@ -30,7 +30,8 @@ class Quantity:
                     try:
                         self.logger.debug('Calculating quantity for trading in {}'.format(row['instrument']))
                         
-                        last_valid_trade = all_trades[(all_trades['instrument']==row['instrument']) & (all_trades['condition']==row['condition']) & (all_trades['status']=='complete') & (all_trades['trade_number']==all_trades['trade_number'].max())]
+                        valid_trades = all_trades[(all_trades['instrument']==row['instrument']) & (all_trades['condition']==row['condition']) & (all_trades['status']=='complete')]
+                        last_valid_trade = valid_trades[valid_trades['trade_number']==valid_trades['trade_number'].max()]
                         
                         # Calculate trade number
                         if len(last_valid_trade):
