@@ -72,7 +72,7 @@ class Quantity:
                             actual_khwab = round(return_ * budget, 2)
                             
                         # Calculate quantity
-                        quantity = round(actual_khwab/(return_ * row['open_today']))
+                        quantity = int(round(actual_khwab/(return_ * row['open_today'])))
                         
                         # Calculate budget required
                         budget_required = round(quantity * row['open_today'], 2)
@@ -89,18 +89,6 @@ class Quantity:
                         squareoff = round(return_ * price, 1)
                         stoploss = round(return_ * price, 1)
                         
-                        # To be updated after placing orders
-                        order_id = 'to_be_placed'
-                        timestamp = 'to_be_placed'
-                        order_type = 'to_be_placed'
-                        
-                        # To be updated after fetching order status
-                        status = 'to_be_placed'
-                        profit = 'to_be_placed'
-                        pl_tag = 'to_be_placed'
-                        flag = 'to_be_placed'
-                        adhoora_khwab = 'to_be_placed'
-                        
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'budget'] = budget
@@ -113,14 +101,6 @@ class Quantity:
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trigger_price'] = trigger_price
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'squareoff'] = squareoff
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'stoploss'] = stoploss
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'order_id'] = order_id
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'timestamp'] = timestamp
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'order_type'] = order_type
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'status'] = status
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'profit'] = profit
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'pl_tag'] = pl_tag
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'flag'] = flag
-                        trades_today.loc[trades_today['instrument']==row['instrument'], 'adhoora_khwab'] = adhoora_khwab
                         
                         self.logger.info('Calculated quantity for trading in {}'.format(row['instrument']))
                     except Exception as ex:

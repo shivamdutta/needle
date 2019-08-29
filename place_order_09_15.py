@@ -92,7 +92,7 @@ class PlaceOrder:
             else:
                 return {'instrument':instrument, 'order_id':order_id, 'order_type':'SL', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         else:
-            return {'instrument':instrument, 'order_id':'order_failed', 'order_type':'order_failed', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            return {'instrument':instrument, 'order_id':-1, 'order_type':'NONE', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
             
     def execute(self):
         
@@ -126,29 +126,9 @@ class PlaceOrder:
                         
                         order_status = orders_df[orders_df['instrument']==instrument].iloc[0]
                         
-                        if order_status['order_id']=='order_failed':
-                            
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'status'] = 'order_failed'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'profit'] = 'order_failed'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'pl_tag'] = 'order_failed'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'flag'] = 'order_failed'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'order_failed'
-                            
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
-                            
-                        else:
-                            
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'timestamp'] = order_status['timestamp']
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_type'] = order_status['order_type']
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'status'] = 'to_be_updated'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'profit'] = 'to_be_updated'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'pl_tag'] = 'to_be_updated'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'flag'] = 'to_be_updated'
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'adhoora_khwab'] = 'to_be_updated'
-                            
-                            self.trades_today.loc[(self.trades_today['instrument']==instrument) & (self.trades_today['order_id']=='to_be_placed'), 'order_id'] = order_status['order_id']
+                        self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_id'] = order_status['order_id']
+                        self.trades_today.loc[self.trades_today['instrument']==instrument, 'timestamp'] = order_status['timestamp']
+                        self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_type'] = order_status['order_type']
                             
                     self.trades_today.to_csv('trades_today.csv', index=False)
                     self.logger.info("Saved updated files after placing orders")
