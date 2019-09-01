@@ -50,7 +50,6 @@ class Ohlc:
             ohlc_df['high'] = [d.get('high') for d in ohlc_df.ohlc]
             ohlc_df['low'] = [d.get('low') for d in ohlc_df.ohlc]
             ohlc_df['close'] = [d.get('close') for d in ohlc_df.ohlc]
-
             ohlc_final_df = ohlc_final_df.append(ohlc_df, ignore_index=False)
 
         ohlc_final_df.reset_index(inplace=True)
