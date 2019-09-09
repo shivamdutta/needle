@@ -27,8 +27,8 @@ class ExitOrder:
                         self.kite.exit_order(variety = self.kite.VARIETY_BO, order_id=order['order_id'], parent_order_id=None)
                         self.logger.info('Exited order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
                     except Exception as ex:
-                        self.logger.error('Error while exiting order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
-                        self.mailer.send_mail('Needle : Exit Order Failure', 'Error while exiting order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
+                        self.logger.error('Error while exiting order with order_id : {order_id} and status : {status} : {}'.format(order_id=order['order_id'], status=order['status'], ex))
+                        self.mailer.send_mail('Error while exiting order with order_id : {order_id} and status : {status} : {}'.format(order_id=order['order_id'], status=order['status'], ex))
                         
                 self.logger.info("Exited from all orders")
                 self.mailer.send_mail('Needle : Exited Orders Successfully', "Order status before exiting : <br>" + pd.DataFrame(orders).to_html())
