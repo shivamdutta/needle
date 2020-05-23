@@ -35,7 +35,7 @@ class Mailer:
         if os.path.exists('token.pkl'):
             with open('token.pkl', 'rb') as token:
                 creds = pickle.load(token)
-
+        
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -43,11 +43,11 @@ class Mailer:
             else:
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
                 creds = flow.run_local_server(host='localhost',port=9090)
-
+                
             # Save the credentials for the next run
             with open('token.pkl', 'wb') as token:
                 pickle.dump(creds, token)
-
+                
         service = build('gmail', 'v1', credentials=creds)
 
         # Call the Gmail API
@@ -67,7 +67,7 @@ class Mailer:
 
                 msg = {'raw': base64.urlsafe_b64encode(message.as_string().encode())}
                 msg['raw'] = msg['raw'].decode("utf-8")
-
+                
                 user_id='me'
                 service = self.load_gmail_service()
 

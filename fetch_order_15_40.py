@@ -63,6 +63,18 @@ class FetchOrder:
                         except Exception as ex:
                             self.logger.error('Error in updating P/L status of trade in {} : {}'.format(row['instrument'], ex))
                             
+                            status = 'incomplete'
+                            profit = 0
+                            pl_tag = 0
+                            flag = 0
+                            adhoora_khwab = round(float(row['actual_khwab']), 2)
+                            
+                            trades_today.loc[trades_today['instrument']==row['instrument'], 'status'] = status
+                            trades_today.loc[trades_today['instrument']==row['instrument'], 'profit'] = profit
+                            trades_today.loc[trades_today['instrument']==row['instrument'], 'pl_tag'] = pl_tag
+                            trades_today.loc[trades_today['instrument']==row['instrument'], 'flag'] = flag
+                            trades_today.loc[trades_today['instrument']==row['instrument'], 'adhoora_khwab'] = adhoora_khwab
+                            
                     trades_today.to_csv('trades_today.csv', index=False)
                     
                     self.logger.info("Updated P/L status of executed orders")
