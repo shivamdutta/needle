@@ -41,10 +41,10 @@ class CompareMarket:
 
                         to_trade_high = merged_df[(merged_df['open_today']>merged_df['high_prev']) & (merged_df['open_today']<(1.15 * merged_df['high_prev']) )]
                         to_trade_high['condition'] = 'high'
-                        to_trade_high['transaction_type'] = 'buy'
+                        to_trade_high['transaction_type'] = 'sell'
                         to_trade_low = merged_df[(merged_df['open_today']<merged_df['low_prev']) & (merged_df['open_today']>(0.85 * merged_df['low_prev']))]
                         to_trade_low['condition'] = 'low'
-                        to_trade_low['transaction_type'] = 'sell'
+                        to_trade_low['transaction_type'] = 'buy'
 
                         trades_today = to_trade_high.append(to_trade_low, ignore_index=True)
                         trades_today = trades_today[['instrument','high_prev','low_prev','open_today','condition','transaction_type']]

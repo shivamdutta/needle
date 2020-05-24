@@ -71,6 +71,10 @@ class Quantity:
                         else:
                             actual_khwab = round(return_ * budget, 2)
                             
+                        # Caluclate tax
+                        tax = 3 * (0.0005647 * actual_khwab)/return_
+                        actual_khwab = round(actual_khwab + tax, 2)
+                            
                         # Calculate quantity
                         quantity = int(round(actual_khwab/(return_ * row['open_today'])))
                         
