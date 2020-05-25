@@ -58,7 +58,7 @@ class Quantity:
                             
                         # Calculate daily khwab
                         if len(last_valid_trade):
-                            if int(last_valid_trade['flag'])==1:
+                            if int(last_valid_trade['pl_tag'])==1:
                                 daily_khwab = round(return_ * budget, 2)
                             else:
                                 daily_khwab = 0
@@ -72,7 +72,12 @@ class Quantity:
                             actual_khwab = round(return_ * budget, 2)
                             
                         # Caluclate tax
-                        tax = 3 * (0.0005647 * actual_khwab)/return_
+                        if actual_khwab > 5 * (round(return_ * budget, 2)):
+                            factor = 1.5
+                        else:
+                            factor = 3
+                        
+                        tax = factor * (0.0005647 * actual_khwab)/return_
                         actual_khwab = round(actual_khwab + tax, 2)
                             
                         # Calculate quantity

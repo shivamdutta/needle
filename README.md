@@ -10,6 +10,7 @@ Also, a reinforcement mechanism is implemented to counter the losses that might 
 ## Cronjobs
 
 ```
+30 4-9 * * 1-5 cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 positions_updater.py
 30 13 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 automate.py
 30 16 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 automate.py
 30 18 * * * cd /home/ubuntu/src/needle && /home/ubuntu/needle/bin/python3 automate.py
