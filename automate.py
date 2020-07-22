@@ -20,7 +20,7 @@ class Automate:
             options = Options()
             options.headless = True
             driver = webdriver.Chrome(options=options)
-            
+
             # Headless feels
             # Open this in browser *Machine IP*:8080
             # or curl "http://127.0.0.1:8080/"

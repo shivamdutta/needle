@@ -87,7 +87,7 @@ class Quantity:
                         budget_required = round(quantity * row['open_today'], 2)
                         
                         # Calculate price and trigger price
-                        if row['condition']=='high':
+                        if row['transaction_type']=='buy':
                             price = round(row['open_today'] + 0.05 * max(round(20 * 0.0010 * row['open_today']), 2), 2)
                             trigger_price = round(row['open_today'] + 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
                         else:
