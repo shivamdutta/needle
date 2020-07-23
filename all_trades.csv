@@ -1,3 +1,0 @@
-instrument,high_prev,low_prev,open_today,condition,transaction_type,trade_number,level,budget,return,daily_khwab,actual_khwab,quantity,budget_required,price,trigger_price,squareoff,stoploss,order_id,timestamp,order_type,status,profit,pl_tag,flag,adhoora_khwab
-NSE:RELIANCE,1977.0,1936.5,1983.0,high,sell,1.0,1.0,25000.0,0.05,1250.0,1292.35,13.0,25779.0,1985.0,1984.0,99.3,99.3,-1.0,2020-07-22 09:15:03.429976,NONE,incomplete,0.0,0.0,0.0,1292.35
-NSE:TITAN,1017.4,999.25,1020.25,high,sell,1.0,1.0,25000.0,0.05,1250.0,1292.35,25.0,25506.25,1021.25,1020.75,51.1,51.1,-1.0,2020-07-22 09:15:01.897665,NONE,incomplete,0.0,0.0,0.0,1292.35
