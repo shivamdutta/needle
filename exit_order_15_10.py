@@ -24,7 +24,7 @@ class ExitOrder:
                 for order in orders:
                     try:
                         self.logger.debug('Exiting order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
-                        self.kite.exit_order(variety = self.kite.VARIETY_BO, order_id=order['order_id'], parent_order_id=None)
+                        self.kite.exit_order(variety = self.kite.VARIETY_+order['variety'].upper(), order_id=order['order_id'], parent_order_id=None)
                         self.logger.info('Exited order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
                     except Exception as ex:
                         self.logger.error('Error while exiting order with order_id : {order_id} and status : {status} : {ex}'.format(order_id=order['order_id'], status=order['status'], ex=ex))
