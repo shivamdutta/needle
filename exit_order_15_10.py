@@ -23,12 +23,13 @@ class ExitOrder:
 
                 for order in orders:
                     try:
-                        self.logger.debug('Exiting order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
-                        self.kite.exit_order(variety = self.kite.VARIETY_+order['variety'].upper(), order_id=order['order_id'], parent_order_id=None)
-                        self.logger.info('Exited order with order_id : {order_id} and status : {status}'.format(order_id=order['order_id'], status=order['status']))
+                        if order['variety']=='bo' | order['variety']=='co' | order['status']=='TRIGGER PENDING' | order['status']=='OPEN':
+                            self.logger.debug('Exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
+                            self.kite.exit_order(variety = self.kite.VARIETY_+order['variety'].upper(), order_id=order['order_id'], parent_order_id=None)
+                            self.logger.info('Exited order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
                     except Exception as ex:
-                        self.logger.error('Error while exiting order with order_id : {order_id} and status : {status} : {ex}'.format(order_id=order['order_id'], status=order['status'], ex=ex))
-                        self.mailer.send_mail('Error while exiting order with order_id : {order_id} and status : {status} : {ex}'.format(order_id=order['order_id'], status=order['status'], ex=ex))
+                        self.logger.error('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status'], ex=ex))
+                        self.mailer.send_mail('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status'], ex=ex))
                         
                 self.logger.info("Exited from all orders")
                 self.mailer.send_mail('Needle : Exited Orders Successfully', "Order status before exiting : <br>" + pd.DataFrame(orders).to_html())
