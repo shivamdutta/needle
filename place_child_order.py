@@ -11,7 +11,7 @@ class PlaceChildOrder:
         self.logger = Logger('trades.log', 'INFO').logging
         self.mailer = Mailer()
         
-    def place_order_child(self, order_type, instrument, transaction_type, quantity, price, trigger_price=None, tag):
+    def place_order_child(self, tag, order_type, instrument, transaction_type, quantity, price, trigger_price=None):
         
         tradingsymbol = instrument[4:]
         
@@ -28,7 +28,7 @@ class PlaceChildOrder:
             if retry:
                 self.logger.info("Retrying...")
             try:
-                if order_type='SL':
+                if order_type=='SL':
                     order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
                                             exchange=self.kite.EXCHANGE_NSE,
                                             tradingsymbol=tradingsymbol,
@@ -131,11 +131,11 @@ class PlaceChildOrder:
                                                 stoploss_trigger_price = stoploss_price - 1
 
                                             # Place target order
-                                            target_order = self.place_order_child(instrument=row['instrument'], order_type='LIMIT', transaction_type=transaction_type, quantity=parent_quantity, price=target_price, tag=parent_order_id)
+                                            target_order = self.place_order_child(tag=parent_order_id, order_type='LIMIT', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=target_price)
                                             self.logger.info('Placed target order for {instrument} and parent order id : {parent_order_id} : {target_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, target_order=target_order))
 
                                             # Place stoploss order
-                                            stoploss_order = self.place_order_child(instrument=row['instrument'], order_type='SL', transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price, tag=parent_order_id)
+                                            stoploss_order = self.place_order_child(tag=parent_order_id, order_type='SL', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
                                             self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
                                         
                             self.logger.info('Processed instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
