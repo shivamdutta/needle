@@ -91,7 +91,7 @@ class PlaceReverseOrder:
                             if quantities_bought>quantities_sold:
                                 reverse_order = self.place_reverse_order(instrument=row['instrument'], transaction_type='sell', quantity=int(quantities_bought-quantities_sold), tag='reverse')
                             elif quantities_bought<quantities_sold:
-                                reverse_order = self.place_reverse_order(instrument=row['instrument'], transaction_type='sell', quantity=int(quantities_sold-quantities_bought), tag='reverse')
+                                reverse_order = self.place_reverse_order(instrument=row['instrument'], transaction_type='buy', quantity=int(quantities_sold-quantities_bought), tag='reverse')
                             
                             self.logger.info('Placed reverse order for {instrument} : {reverse_order}'.format(instrument=row['instrument'], reverse_order=reverse_order))
                                         
