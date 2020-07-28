@@ -1,0 +1,3 @@
+instrument,high_prev,low_prev,open_today,condition,transaction_type,trade_number,level,budget,return,daily_khwab,actual_khwab,quantity,budget_required,price,trigger_price,squareoff,stoploss,order_id,timestamp,order_type,status,profit,pl_tag,flag,adhoora_khwab
+NSE:SUNTV,381.0,373.55,382.0,high,sell,1.0,1.0,25000.0,0.05,1250.0,1292.35,68.0,25976.0,379.7,380.1,19.0,19.0,200728200044869,2020-07-28 09:15:01.572990,SL,,,,,
+NSE:MCDOWELL-N,601.0,584.25,575.0,low,buy,1.0,1.0,25000.0,0.05,1250.0,1292.35,45.0,25875.0,578.45,577.9,28.9,28.9,200728200044302,2020-07-28 09:15:00.997424,SL,,,,,
