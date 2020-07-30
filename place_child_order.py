@@ -21,7 +21,7 @@ class PlaceChildOrder:
             transaction_type = self.kite.TRANSACTION_TYPE_SELL
             
         status_flag = False
-        limit_order_flag = False
+        final_order_type = order_type
         retry = 0
         num_retries = 3
         while status_flag is not True and retry < num_retries:
@@ -29,21 +29,44 @@ class PlaceChildOrder:
                 self.logger.info("Retrying...")
             try:
                 if order_type=='SL':
-                    order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
-                                            exchange=self.kite.EXCHANGE_NSE,
-                                            tradingsymbol=tradingsymbol,
-                                            transaction_type=transaction_type,
-                                            quantity=quantity,
-                                            order_type=self.kite.ORDER_TYPE_SL,
-                                            product=self.kite.PRODUCT_MIS,
-                                            price=price,
-                                            validity=self.kite.VALIDITY_DAY,
-                                            disclosed_quantity=None,
-                                            trigger_price=trigger_price,
-                                            squareoff=None,
-                                            stoploss=None,
-                                            trailing_stoploss=None,
-                                            tag=tag)
+                    try:
+                        order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
+                                                exchange=self.kite.EXCHANGE_NSE,
+                                                tradingsymbol=tradingsymbol,
+                                                transaction_type=transaction_type,
+                                                quantity=quantity,
+                                                order_type=self.kite.ORDER_TYPE_SL,
+                                                product=self.kite.PRODUCT_MIS,
+                                                price=price,
+                                                validity=self.kite.VALIDITY_DAY,
+                                                disclosed_quantity=None,
+                                                trigger_price=trigger_price,
+                                                squareoff=None,
+                                                stoploss=None,
+                                                trailing_stoploss=None,
+                                                tag=tag)
+                    except Exception as ex:
+                        if str(ex)[0:13]=='Trigger price':
+                            order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
+                                                exchange=self.kite.EXCHANGE_NSE,
+                                                tradingsymbol=tradingsymbol,
+                                                transaction_type=transaction_type,
+                                                quantity=quantity,
+                                                order_type=self.kite.ORDER_TYPE_MARKET,
+                                                product=self.kite.PRODUCT_MIS,
+                                                price=None,
+                                                validity=self.kite.VALIDITY_DAY,
+                                                disclosed_quantity=None,
+                                                trigger_price=None,
+                                                squareoff=None,
+                                                stoploss=None,
+                                                trailing_stoploss=None,
+                                                tag=tag)
+                            final_order_type = 'MARKET'
+                            self.logger.warning("MARKET order placed as SL order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                        else:
+                            raise
+                            
                 else:
                     order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
                                         exchange=self.kite.EXCHANGE_NSE,
@@ -60,7 +83,6 @@ class PlaceChildOrder:
                                         stoploss=None,
                                         trailing_stoploss=None,
                                         tag=tag)
-                    limit_order_flag = True
                         
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
                 status_flag = True
@@ -72,10 +94,7 @@ class PlaceChildOrder:
                     self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                 
         if status_flag:
-            if limit_order_flag:
-                return {'instrument':instrument, 'order_id':order_id, 'order_type':'LIMIT', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
-            else:
-                return {'instrument':instrument, 'order_id':order_id, 'order_type':'SL', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            return {'instrument':instrument, 'order_id':order_id, 'order_type':final_order_type, 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         else:
             return {'instrument':instrument, 'order_id':-1, 'order_type':'NONE', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         

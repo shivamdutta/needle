@@ -114,7 +114,7 @@ class PlaceOrder:
         tag = '{t_no}:{lev}'.format(t_no = int(record_to_trade['trade_number']), lev = int(record_to_trade['level']))
 
         status_flag = False
-        limit_order_flag = False
+        market_order_flag = False
         retry = 0
         num_retries = 3
         while status_flag is not True and retry < num_retries:
@@ -144,7 +144,7 @@ class PlaceOrder:
                                             tradingsymbol=tradingsymbol,
                                             transaction_type=transaction_type,
                                             quantity=quantity,
-                                            order_type=self.kite.ORDER_TYPE_LIMIT,
+                                            order_type=self.kite.ORDER_TYPE_MARKET,
                                             product=self.kite.PRODUCT_MIS,
                                             price=price,
                                             validity=self.kite.VALIDITY_DAY,
@@ -154,8 +154,8 @@ class PlaceOrder:
                                             stoploss=None,
                                             trailing_stoploss=None,
                                             tag=tag)
-                        limit_order_flag = True
-                        self.logger.warning("LIMIT order placed as SL order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                        market_order_flag = True
+                        self.logger.warning("MARKET order placed as SL order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                     else:
                         raise
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
@@ -168,8 +168,8 @@ class PlaceOrder:
                     self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                 
         if status_flag:
-            if limit_order_flag:
-                return {'instrument':instrument, 'order_id':order_id, 'order_type':'LIMIT', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            if market_order_flag:
+                return {'instrument':instrument, 'order_id':order_id, 'order_type':'MARKET', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
             else:
                 return {'instrument':instrument, 'order_id':order_id, 'order_type':'SL', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         else:

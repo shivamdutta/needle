@@ -88,15 +88,15 @@ class Quantity:
                         
                         # Calculate price and trigger price
                         if row['transaction_type']=='buy':
-                            price = round(row['open_today'] + 0.05 * max(round(20 * 0.006 * row['open_today']), 2), 2)
-                            trigger_price = round(row['open_today'] + 0.05 * max(round(20 * 0.005 * row['open_today']),1), 2)
+                            price = round(row['open_today'] + 0.05 * max(round(20 * 0.001 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] + 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
                         else:
-                            price = round(row['open_today'] - 0.05 * max(round(20 * 0.006 * row['open_today']), 2), 2)
-                            trigger_price = round(row['open_today'] - 0.05 * max(round(20 * 0.005 * row['open_today']),1), 2)
+                            price = round(row['open_today'] - 0.05 * max(round(20 * 0.001 * row['open_today']), 2), 2)
+                            trigger_price = round(row['open_today'] - 0.05 * max(round(20 * 0.0005 * row['open_today']),1), 2)
                             
                         # Calculate square off and stoploss
                         squareoff = round(return_ * price, 1)
-                        stoploss = round(return_ * price, 1)
+                        stoploss = round(return_ * (4.25/5) * price, 1)
                         
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
