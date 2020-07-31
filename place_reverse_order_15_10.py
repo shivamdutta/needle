@@ -1,4 +1,5 @@
 import pandas as pd
+from multiprocessing.dummy import Pool as ThreadPool
 
 from LogIn import LogIn
 from LoggerWrapper import Logger
@@ -11,15 +12,20 @@ class PlaceReverseOrder:
         self.logger = Logger('trades.log', 'INFO').logging
         self.mailer = Mailer()
         
-    def place_reverse_order(self, instrument, transaction_type, quantity, tag):
+    def place_reverse_order(self, instrument):
+        
+        record_to_trade = self.reverse_orders_to_place[self.reverse_orders_to_place['instrument']==instrument].iloc[0]
         
         tradingsymbol = instrument[4:]
         
-        if transaction_type=='buy':
+        if record_to_trade['transaction_type']=='buy':
             transaction_type = self.kite.TRANSACTION_TYPE_BUY
         else:
             transaction_type = self.kite.TRANSACTION_TYPE_SELL
             
+        quantity = int(record_to_trade['quantity'])
+        tag = 'reverse'
+        
         status_flag = False
         retry = 0
         num_retries = 3
@@ -53,9 +59,9 @@ class PlaceReverseOrder:
                     self.mailer.send_mail('Needle : Place Order Failure', "Order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                 
         if status_flag:
-            return {'instrument':instrument, 'order_id':order_id, 'order_type':'MARKET', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            return {'instrument':instrument, 'order_id':order_id, 'order_type':'MARKET', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330), 'transaction_type':transaction_type, 'quantity':quantity, 'tag':tag}
         else:
-            return {'instrument':instrument, 'order_id':-1, 'order_type':'NONE', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+            return {'instrument':instrument, 'order_id':-1, 'order_type':'NONE', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330), 'transaction_type':transaction_type, 'quantity':quantity, 'tag':tag}
         
     def execute(self):
         
@@ -68,11 +74,23 @@ class PlaceReverseOrder:
                 self.logger.debug("Fetching all orders")
                 orders = self.kite.orders()
                 orders_df = pd.DataFrame(orders)
-                self.logger.debug("Fetched all orders")
+                self.logger.info("Fetched all orders")
+                
+                try:
+                    self.logger.debug("Fetching positions of orders placed today")
+                    positions = self.kite.positions()
+                    positions_day = positions['day']
+                    positions_df = pd.DataFrame.from_records(positions_day)
+                    self.logger.info("Fetched positions of orders placed today")
+                    self.mailer.send_mail('Needle : Positions Update', "Positions : <br>" + positions_df.to_html())   
+                except Exception as ex:
+                    self.logger.error('Error in fetching positions of orders placed today : {}'.format(ex))
 
                 try:
                     self.logger.debug("Placing reverse orders")
 
+                    self.reverse_orders_to_place = pd.DataFrame()
+                    
                     for index, row in self.trades_today.iterrows():
                         
                         try:
@@ -88,24 +106,33 @@ class PlaceReverseOrder:
                                 else:
                                     quantities_sold = quantities_sold + trans_quantity_sum
 
-                            if quantities_bought>quantities_sold:
-                                reverse_order = self.place_reverse_order(instrument=row['instrument'], transaction_type='sell', quantity=int(quantities_bought-quantities_sold), tag='reverse')
-                            elif quantities_bought<quantities_sold:
-                                reverse_order = self.place_reverse_order(instrument=row['instrument'], transaction_type='buy', quantity=int(quantities_sold-quantities_bought), tag='reverse')
+                            quantity = int(abs(quantities_bought-quantities_sold))
+
+                            if quantity:
+                                if quantities_bought>quantities_sold:
+                                    transaction_type = 'sell'
+                                elif quantities_bought<quantities_sold:
+                                    transaction_type = 'buy'
+                                reverse_order_to_place = pd.DataFrame(data={'instrument':[row['instrument']], 'transaction_type':[transaction_type], 'quantity':[quantity]})
+                                self.reverse_orders_to_place = self.reverse_orders_to_place.append(reverse_order_to_place, ignore_index=True)
                             
-                            self.logger.info('Placed reverse order for {instrument} : {reverse_order}'.format(instrument=row['instrument'], reverse_order=reverse_order))
-                                        
                             self.logger.info('Processed instrument {instrument} for placing reverse order'.format(instrument=row['instrument']))
                         except Exception as ex:
                             self.logger.error('Error while processing instrument {instrument} for placing reverse order : {ex}'.format(instrument=row['instrument'], ex=ex))
                             self.mailer.send_mail('Error while processing instrument {instrument} for placing reverse order : {ex}'.format(instrument=row['instrument'], ex=ex))
 
-                    self.logger.info("Processed all instruments")
-                    self.mailer.send_mail('Needle : Placed Reverse Orders Successfully', "All orders list : <br>" + pd.DataFrame(self.kite.orders()).to_html())
-
+                    
+                    n_instruments_to_place_reverse_orders = len(self.reverse_orders_to_place)
+                    if n_instruments_to_place_reverse_orders:
+                        pool = ThreadPool(n_instruments_to_place_reverse_orders)
+                        reverse_orders = pool.map(self.place_reverse_order, list(set(self.reverse_orders_to_place['instrument'])))
+                        reverse_orders_df = pd.DataFrame(reverse_orders)
+                        self.logger.info("Placed reverse orders successfully : {}".format(reverse_orders))
+                        self.mailer.send_mail('Needle : Placed Reverse Orders Successfully', "Reverse orders : <br>" + pd.DataFrame(reverse_orders_df.to_html()))
+                        
                 except Exception as ex:
-                    self.logger.error("Error while processing all instruments : {}".format(ex))
-                    self.mailer.send_mail('Needle : Place Reverse Order Failure', 'Error while processing all instruments : {}'.format(ex))
+                    self.logger.error("Error while placing reverse orders : {}".format(ex))
+                    self.mailer.send_mail('Needle : Place Reverse Order Failure', 'Error while placing reverse orders : {}'.format(ex))
 
             except Exception as ex:
                 self.logger.error("Error in fetching all orders : {}".format(ex))

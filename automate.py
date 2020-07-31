@@ -34,6 +34,7 @@ class Automate:
             user_name=self.config['user_name']
             password=self.config['password']
             driver.implicitly_wait(20)
+            time.sleep(5)
             #self.logger.info('{}'.format(driver.page_source))
             x_path_id = '''/html/body/div[1]/div/div[2]/div[1]/div/div/div[2]/form/div[1]/input'''
             x_path_pass = '''/html/body/div[1]/div/div[2]/div[1]/div/div/div[2]/form/div[2]/input'''
