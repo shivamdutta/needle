@@ -80,9 +80,9 @@ class PlaceReverseOrder:
                     self.logger.debug("Fetching positions of orders placed today")
                     positions = self.kite.positions()
                     positions_day = positions['day']
-                    positions_df = pd.DataFrame.from_records(positions_day)
+                    positions_df = pd.DataFrame.from_records(positions_day)[['tradingsymbol', 'pnl', 'quantity', 'buy_price', 'sell_price', 'last_price', 'product']]
                     self.logger.info("Fetched positions of orders placed today")
-                    self.mailer.send_mail('Needle : Positions Update', "Positions : <br>" + positions_df.to_html())   
+                    self.mailer.send_mail("Needle : Positions Update (Net PnL : {})".format(round(positions_df.pnl.sum(), 2)), "Positions : <br>" + positions_df.to_html())
                 except Exception as ex:
                     self.logger.error('Error in fetching positions of orders placed today : {}'.format(ex))
 
@@ -128,7 +128,7 @@ class PlaceReverseOrder:
                         reverse_orders = pool.map(self.place_reverse_order, list(set(self.reverse_orders_to_place['instrument'])))
                         reverse_orders_df = pd.DataFrame(reverse_orders)
                         self.logger.info("Placed reverse orders successfully : {}".format(reverse_orders))
-                        self.mailer.send_mail('Needle : Placed Reverse Orders Successfully', "Reverse orders : <br>" + pd.DataFrame(reverse_orders_df.to_html()))
+                        self.mailer.send_mail('Needle : Placed Reverse Orders Successfully', "Reverse orders : <br>" + reverse_orders_df.to_html())
                         
                 except Exception as ex:
                     self.logger.error("Error while placing reverse orders : {}".format(ex))

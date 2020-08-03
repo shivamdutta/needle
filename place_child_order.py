@@ -163,7 +163,6 @@ class PlaceChildOrder:
                             self.mailer.send_mail('Error while processing instrument {instrument} for placing child orders : {ex}'.format(instrument=row['instrument'], ex=ex))
 
                     self.logger.info("Processed all instruments")
-                    self.mailer.send_mail('Needle : Placed Child Orders Successfully', "All orders list : <br>" + pd.DataFrame(self.kite.orders()).to_html())
 
                 except Exception as ex:
                     self.logger.error("Error while processing all instruments : {}".format(ex))
