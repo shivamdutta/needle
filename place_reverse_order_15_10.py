@@ -71,20 +71,17 @@ class PlaceReverseOrder:
             self.logger.info("Loaded required files for placing reverse orders")
         
             try:
-                self.logger.debug("Fetching all orders")
-                orders = self.kite.orders()
-                orders_df = pd.DataFrame(orders)
-                self.logger.info("Fetched all orders")
+                self.logger.debug("Fetching orders placed today and their positions")
                 
-                try:
-                    self.logger.debug("Fetching positions of orders placed today")
-                    positions = self.kite.positions()
-                    positions_day = positions['day']
-                    positions_df = pd.DataFrame.from_records(positions_day)[['tradingsymbol', 'pnl', 'quantity', 'buy_price', 'sell_price', 'last_price', 'product']]
-                    self.logger.info("Fetched positions of orders placed today")
-                    self.mailer.send_mail("Needle : Positions Update (Net PnL : {})".format(round(positions_df.pnl.sum(), 2)), "Positions : <br>" + positions_df.to_html())
-                except Exception as ex:
-                    self.logger.error('Error in fetching positions of orders placed today : {}'.format(ex))
+                orders_df = pd.DataFrame(self.kite.orders())
+                orders_df = orders_df[orders_df['product']=='MIS'][['tradingsymbol', 'transaction_type', 'status', 'order_timestamp',  'order_type', 'tag', 'price', 'trigger_price', 'average_price', 'quantity']]
+                
+                positions_df = pd.DataFrame.from_records(self.kite.positions()['day'])
+                positions_df = positions_df[positions_df['product']=='MIS'][['tradingsymbol', 'pnl', 'quantity', 'buy_price', 'sell_price', 'last_price']]
+                
+                self.mailer.send_mail("Needle : Positions & Orders Update (Net PnL : {})".format(round(positions_df.pnl.sum(), 2)), "Positions : <br>" + positions_df.to_html() + " <br> Orders : <br>" + orders_df.to_html())
+                
+                self.logger.info("Fetched orders placed today and their positions")
 
                 try:
                     self.logger.debug("Placing reverse orders")
@@ -135,8 +132,8 @@ class PlaceReverseOrder:
                     self.mailer.send_mail('Needle : Place Reverse Order Failure', 'Error while placing reverse orders : {}'.format(ex))
 
             except Exception as ex:
-                self.logger.error("Error in fetching all orders : {}".format(ex))
-                self.mailer.send_mail('Needle : Place Reverse Order Failure', 'Error in fetching all orders : {}'.format(ex))
+                self.logger.error("Error in fetching orders placed today and their positions : {}".format(ex))
+                self.mailer.send_mail('Needle : Place Reverse Order Failure', 'Error in fetching orders placed today and their positions : {}'.format(ex))
             
         except Exception as ex:
             self.logger.error('Error in loading required files for placing reverse orders : {}'.format(ex))                

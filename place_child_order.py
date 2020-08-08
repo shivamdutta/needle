@@ -103,7 +103,7 @@ class PlaceChildOrder:
         try:
             self.logger.debug("Loading required files for placing child orders")
             self.trades_today = pd.read_csv('trades_today.csv')
-            self.logger.info("Loaded required files for placing child orders")
+            self.logger.debug("Loaded required files for placing child orders")
         
             try:
                 self.logger.debug("Fetching all orders")
@@ -157,12 +157,12 @@ class PlaceChildOrder:
                                             stoploss_order = self.place_order_child(tag=parent_order_id, order_type='SL', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
                                             self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
                                         
-                            self.logger.info('Processed instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
+                            self.logger.debug('Processed instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
                         except Exception as ex:
                             self.logger.error('Error while processing instrument {instrument} for placing child orders : {ex}'.format(instrument=row['instrument'], ex=ex))
                             self.mailer.send_mail('Error while processing instrument {instrument} for placing child orders : {ex}'.format(instrument=row['instrument'], ex=ex))
 
-                    self.logger.info("Processed all instruments")
+                    self.logger.debug("Processed all instruments")
 
                 except Exception as ex:
                     self.logger.error("Error while processing all instruments : {}".format(ex))

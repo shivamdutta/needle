@@ -96,7 +96,7 @@ class Quantity:
                             
                         # Calculate square off and stoploss
                         squareoff = round(return_ * price, 1)
-                        stoploss = round(return_ * (4.25/5) * price, 1)
+                        stoploss = round(return_ * (2.25/5) * price, 1)
                         
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'trade_number'] = trade_number
                         trades_today.loc[trades_today['instrument']==row['instrument'], 'level'] = level
