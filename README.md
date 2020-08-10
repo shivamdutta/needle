@@ -10,9 +10,9 @@ Also, a reinforcement mechanism is implemented to counter the losses that might 
 ## Cronjobs
 
 ```
-46-59 3 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py
-*/5 4-8 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py
-0-39/5 9 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py
+46-59 3 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py && python3 cancel_redundant_child_order.py
+*/5 4-8 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py && python3 cancel_redundant_child_order.py
+0-39/5 9 * * 1-5 cd /home/ec2-user/needle && python3 place_child_order.py && python3 cancel_redundant_child_order.py
 
 0 4-10 * * 1-5 cd /home/ec2-user/needle && python3 positions_updater.py
 
