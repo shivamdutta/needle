@@ -20,7 +20,7 @@ class LogIn:
                 auth = json.load(f)
 
             kite.set_access_token(auth['access_token'])
-            self.logger.info('Logged in successfully')
+            self.logger.debug('Logged in successfully')
             
         except Exception as ex:
             self.logger.error('First attempt to login failed : {}'.format(ex))

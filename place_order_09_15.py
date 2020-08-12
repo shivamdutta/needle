@@ -111,7 +111,7 @@ class PlaceOrder:
         squareoff = float(record_to_trade['squareoff'])
         stoploss = float(record_to_trade['stoploss'])
         trailing_stoploss = 0
-        tag = '{t_no}:{lev}'.format(t_no = int(record_to_trade['trade_number']), lev = int(record_to_trade['level']))
+        tag = 'parent'
 
         status_flag = False
         market_order_flag = False
@@ -127,7 +127,7 @@ class PlaceOrder:
                                             tradingsymbol=tradingsymbol,
                                             transaction_type=transaction_type,
                                             quantity=quantity,
-                                            order_type=self.kite.ORDER_TYPE_SL,
+                                            order_type=self.kite.ORDER_TYPE_SLM,
                                             product=self.kite.PRODUCT_MIS,
                                             price=price,
                                             validity=self.kite.VALIDITY_DAY,
@@ -155,7 +155,7 @@ class PlaceOrder:
                                             trailing_stoploss=None,
                                             tag=tag)
                         market_order_flag = True
-                        self.logger.warning("MARKET order placed as SL order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                        self.logger.warning("MARKET order placed as SLM order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                     else:
                         raise
                 self.logger.info("Order placed ID : {}, instrument : {}".format(order_id, tradingsymbol))
@@ -171,7 +171,7 @@ class PlaceOrder:
             if market_order_flag:
                 return {'instrument':instrument, 'order_id':order_id, 'order_type':'MARKET', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
             else:
-                return {'instrument':instrument, 'order_id':order_id, 'order_type':'SL', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
+                return {'instrument':instrument, 'order_id':order_id, 'order_type':'SLM', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
         else:
             return {'instrument':instrument, 'order_id':-1, 'order_type':'NONE', 'timestamp':pd.Timestamp.now()+pd.DateOffset(minutes=330)}
             

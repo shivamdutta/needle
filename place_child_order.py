@@ -28,14 +28,14 @@ class PlaceChildOrder:
             if retry:
                 self.logger.info("Retrying...")
             try:
-                if order_type=='SL':
+                if order_type=='SLM':
                     try:
                         order_id = self.kite.place_order(variety=self.kite.VARIETY_REGULAR,
                                                 exchange=self.kite.EXCHANGE_NSE,
                                                 tradingsymbol=tradingsymbol,
                                                 transaction_type=transaction_type,
                                                 quantity=quantity,
-                                                order_type=self.kite.ORDER_TYPE_SL,
+                                                order_type=self.kite.ORDER_TYPE_SLM,
                                                 product=self.kite.PRODUCT_MIS,
                                                 price=price,
                                                 validity=self.kite.VALIDITY_DAY,
@@ -63,7 +63,7 @@ class PlaceChildOrder:
                                                 trailing_stoploss=None,
                                                 tag=tag)
                             final_order_type = 'MARKET'
-                            self.logger.warning("MARKET order placed as SL order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
+                            self.logger.warning("MARKET order placed as SLM order placement failed for {} with tag {} : {}".format(tradingsymbol, tag, ex))
                         else:
                             raise
                             
@@ -118,42 +118,44 @@ class PlaceChildOrder:
                         
                         try:
                             self.logger.debug('Processing instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
-                            orders_instrument = orders_df[(orders_df['tradingsymbol']==row['instrument'][4:]) & (orders_df['status']=='COMPLETE') & (orders_df['variety']=='regular')]
+                            orders_instrument = orders_df[orders_df['tradingsymbol']==row['instrument'][4:]]
                             if len(orders_instrument.transaction_type.unique().tolist())==1:
-                                
-                                parent_order_id = orders_instrument.order_id.unique().tolist()
-                                parent_quantity = orders_instrument.quantity.sum()
-                                parent_order_transaction_type = orders_instrument.transaction_type.unique().tolist()[0]
+                                for index_1, row_1 in orders_instrument.iterrows():
+                                    if row_1['product']!='BO':
+                                        if row_1['status']=='COMPLETE':
+                                            parent_order_id = row_1['order_id']
+                                            parent_quantity = row_1['quantity']
+                                            parent_order_transaction_type = row_1['transaction_type']
 
-                                price = float(row['price'])
-                                squareoff = float(row['squareoff'])
-                                stoploss = float(row['stoploss'])
+                                            price = float(row['price'])
+                                            squareoff = float(row['squareoff'])
+                                            stoploss = float(row['stoploss'])
 
-                                if parent_order_transaction_type=='BUY':
+                                            if parent_order_transaction_type=='BUY':
 
-                                    transaction_type='sell'
+                                                transaction_type='sell'
 
-                                    target_price = price + squareoff
+                                                target_price = price + squareoff
 
-                                    stoploss_price = price - stoploss
-                                    stoploss_trigger_price = stoploss_price + 1
+                                                stoploss_price = price - stoploss
+                                                stoploss_trigger_price = stoploss_price + 1
 
-                                else:
+                                            else:
 
-                                    transaction_type='buy'
+                                                transaction_type='buy'
 
-                                    target_price = price - squareoff
+                                                target_price = price - squareoff
 
-                                    stoploss_price = price + stoploss
-                                    stoploss_trigger_price = stoploss_price - 1
+                                                stoploss_price = price + stoploss
+                                                stoploss_trigger_price = stoploss_price - 1
 
-                                # Place target order
-                                target_order = self.place_order_child(tag=str(parent_order_id), order_type='LIMIT', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=target_price)
-                                self.logger.info('Placed target order for {instrument} and parent order id : {parent_order_id} : {target_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, target_order=target_order))
+                                            # Place target order
+                                            target_order = self.place_order_child(tag=parent_order_id, order_type='LIMIT', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=target_price)
+                                            self.logger.info('Placed target order for {instrument} and parent order id : {parent_order_id} : {target_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, target_order=target_order))
 
-                                # Place stoploss order
-                                stoploss_order = self.place_order_child(tag=str(parent_order_id), order_type='SL', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
-                                self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
+                                            # Place stoploss order
+                                            stoploss_order = self.place_order_child(tag=parent_order_id, order_type='SLM', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
+                                            self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
                                         
                             self.logger.debug('Processed instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
                         except Exception as ex:
