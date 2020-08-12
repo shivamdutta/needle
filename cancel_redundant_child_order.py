@@ -32,54 +32,55 @@ class CancelRedundantChildOrder:
                         try:
                             self.logger.debug('Processing instrument {instrument} for cancelling redundant child orders'.format(instrument=row['instrument']))
                             orders_instrument = orders_df[(orders_df['tradingsymbol']==row['instrument'][4:]) & (orders_df['status']=='COMPLETE')]
-                            
-                            quantities_bought = 0
-                            quantities_sold = 0
-                            for trans_type in orders_instrument.transaction_type.unique().tolist():
-                                trans_quantity_sum = orders_instrument[orders_instrument['transaction_type']==trans_type].quantity.sum()
-                                if trans_type=='BUY':
-                                    quantities_bought = quantities_bought + trans_quantity_sum
-                                else:
-                                    quantities_sold = quantities_sold + trans_quantity_sum
-
-                            quantity = int(abs(quantities_bought-quantities_sold))
-                            
-                            if quantity==0:
-                                redundant_orders_instrument = orders_df[(orders_df['tradingsymbol']==row['instrument'][4:]) & (orders_df['status']!='COMPLETE')]
+                            if orders_instrument.transaction_type.nunique()==2:
                                 
-                                #############
-                                
-                                try:
-                                    self.logger.debug("Exiting from redundant child orders for instrument {}".format(row['instrument']))
+                                quantities_bought = 0
+                                quantities_sold = 0
+                                for trans_type in orders_instrument.transaction_type.unique().tolist():
+                                    trans_quantity_sum = orders_instrument[orders_instrument['transaction_type']==trans_type].quantity.sum()
+                                    if trans_type=='BUY':
+                                        quantities_bought = quantities_bought + trans_quantity_sum
+                                    else:
+                                        quantities_sold = quantities_sold + trans_quantity_sum
 
-                                    for index_1, order in redundant_orders_instrument.iterrows():
-                                        try:
-                                            if (order['status']=='TRIGGER PENDING') | (order['status']=='OPEN'):
-                                                self.logger.debug('Exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
+                                quantity = int(abs(quantities_bought-quantities_sold))
 
-                                                if (order['variety']=='bo'):
-                                                    var = self.kite.VARIETY_BO
-                                                elif (order['variety']=='co'):
-                                                    var = self.kite.VARIETY_CO
-                                                elif (order['variety']=='regular'):
-                                                    var = self.kite.VARIETY_REGULAR
-                                                elif (order['variety']=='amo'):
-                                                    var = self.kite.VARIETY_AMO
+                                if quantity==0:
+                                    redundant_orders_instrument = orders_df[(orders_df['tradingsymbol']==row['instrument'][4:]) & (orders_df['status']!='COMPLETE')]
 
-                                                self.kite.exit_order(variety = var, order_id=order['order_id'], parent_order_id=None)
-                                                self.logger.info('Exited order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
-                                        except Exception as ex:
-                                            self.logger.error('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status} : {ex}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status'], ex=ex))
-                                            self.mailer.send_mail('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']), str(ex))
+                                    #############
 
-                                    self.logger.info("Exited from redundant child orders for instrument {}".format(row['instrument']))
+                                    try:
+                                        self.logger.debug("Exiting from redundant child orders for instrument {}".format(row['instrument']))
 
-                                except Exception as ex:
-                                    self.logger.error("Error in exiting from redundant child orders for instrument {} : {}".format(row['instrument'], ex))
-                                    self.mailer.send_mail('Needle : Cancel Redundant Child Order Failure', 'Error in exiting from redundant child orders for instrument {} : {}'.format(row['instrument'], ex))
-                                
-                                #############
-                                
+                                        for index_1, order in redundant_orders_instrument.iterrows():
+                                            try:
+                                                if (order['status']=='TRIGGER PENDING') | (order['status']=='OPEN'):
+                                                    self.logger.debug('Exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
+
+                                                    if (order['variety']=='bo'):
+                                                        var = self.kite.VARIETY_BO
+                                                    elif (order['variety']=='co'):
+                                                        var = self.kite.VARIETY_CO
+                                                    elif (order['variety']=='regular'):
+                                                        var = self.kite.VARIETY_REGULAR
+                                                    elif (order['variety']=='amo'):
+                                                        var = self.kite.VARIETY_AMO
+
+                                                    self.kite.exit_order(variety = var, order_id=order['order_id'], parent_order_id=None)
+                                                    self.logger.info('Exited order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']))
+                                            except Exception as ex:
+                                                self.logger.error('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status} : {ex}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status'], ex=ex))
+                                                self.mailer.send_mail('Error while exiting order with order_id : {order_id}, variety : {variety} and status : {status}'.format(order_id=order['order_id'], variety=order['variety'], status=order['status']), str(ex))
+
+                                        self.logger.debug("Exited from redundant child orders for instrument {}".format(row['instrument']))
+
+                                    except Exception as ex:
+                                        self.logger.error("Error in exiting from redundant child orders for instrument {} : {}".format(row['instrument'], ex))
+                                        self.mailer.send_mail('Needle : Cancel Redundant Child Order Failure', 'Error in exiting from redundant child orders for instrument {} : {}'.format(row['instrument'], ex))
+
+                                    #############
+
                                         
                             self.logger.debug('Processed instrument {instrument} for cancelling redundant child orders'.format(instrument=row['instrument']))
                         except Exception as ex:

@@ -31,7 +31,7 @@ class UpdateTrades:
                     self.logger.debug("Saving main table")
                     all_trades.to_csv('all_trades.csv', index=False)
                     self.logger.info("Saved main table")
-                    self.mailer.send_mail('Needle : Updated Trades Successfully', "All Trades : <br>" + all_trades.to_html())
+                    self.mailer.send_mail('Needle : Updated Trades Successfully (Net PnL : {})'.format(round(all_trades.profit.sum(), 2)), "All Trades : <br>" + all_trades.to_html())
                     
                 except Exception as ex:
                     self.logger.error('Error in saving main table : {}'.format(ex))
