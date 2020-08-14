@@ -37,7 +37,7 @@ class PlaceChildOrder:
                                                 quantity=quantity,
                                                 order_type=self.kite.ORDER_TYPE_SLM,
                                                 product=self.kite.PRODUCT_MIS,
-                                                price=price,
+                                                price=None,
                                                 validity=self.kite.VALIDITY_DAY,
                                                 disclosed_quantity=None,
                                                 trigger_price=trigger_price,
