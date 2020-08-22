@@ -119,43 +119,55 @@ class PlaceChildOrder:
                         try:
                             self.logger.debug('Processing instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
                             orders_instrument = orders_df[orders_df['tradingsymbol']==row['instrument'][4:]]
-                            if len(orders_instrument.transaction_type.unique().tolist())==1:
-                                for index_1, row_1 in orders_instrument.iterrows():
-                                    if row_1['product']!='BO':
-                                        if row_1['status']=='COMPLETE':
-                                            parent_order_id = row_1['order_id']
-                                            parent_quantity = row_1['quantity']
-                                            parent_order_transaction_type = row_1['transaction_type']
+                            parent_orders = orders_instrument[(orders_instrument['tag']=='parent') & (orders_instrument['status']=='COMPLETE')]
+                            
+                            parent_order_id = parent_orders.order_id.unique().tolist()
+                            parent_quantity = parent_orders.quantity.sum()
+                            parent_order_transaction_type = parent_orders.transaction_type.unique().tolist()[0]
+                            
+                            price = float(row['price'])
+                            squareoff = float(row['squareoff'])
+                            stoploss = float(row['stoploss'])
+                            
+                            if parent_order_transaction_type=='BUY':
 
-                                            price = float(row['price'])
-                                            squareoff = float(row['squareoff'])
-                                            stoploss = float(row['stoploss'])
+                                transaction_type='sell'
 
-                                            if parent_order_transaction_type=='BUY':
+                                target_price = price + squareoff
 
-                                                transaction_type='sell'
+                                stoploss_price = price - stoploss
+                                stoploss_trigger_price = stoploss_price + 1
 
-                                                target_price = price + squareoff
+                            else:
 
-                                                stoploss_price = price - stoploss
-                                                stoploss_trigger_price = stoploss_price + 1
+                                transaction_type='buy'
 
-                                            else:
+                                target_price = price - squareoff
 
-                                                transaction_type='buy'
+                                stoploss_price = price + stoploss
+                                stoploss_trigger_price = stoploss_price - 1
+                            
+                            # Place target order
+                            
+                            target_orders = orders_instrument[(orders_instrument['tag']=='target') & (orders_instrument['status'].isin(['COMPLETE', 'OPEN', 'CANCELLED']))]
+                            
+                            target_quantity = target_orders.quantity.sum()
+                            target_lag_quantity = int(abs(parent_quantity - target_quantity))
 
-                                                target_price = price - squareoff
+                            if target_lag_quantity:
+                                target_order = self.place_order_child(tag='target', order_type='LIMIT', instrument=row['instrument'], transaction_type=transaction_type, quantity=target_lag_quantity, price=target_price)
+                                self.logger.info('Placed target order for {instrument} and parent order id : {parent_order_id} : {target_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, target_order=target_order))
+                            
+                            # Place stoploss orders
+                            
+                            stoploss_orders = orders_instrument[(orders_instrument['tag']=='stoploss') & (orders_instrument['status'].isin(['COMPLETE', 'TRIGGER PENDING', 'CANCELLED']))]
+                            
+                            stoploss_quantity = stoploss_orders.quantity.sum()
+                            stoploss_lag_quantity = int(abs(parent_quantity - stoploss_quantity))
 
-                                                stoploss_price = price + stoploss
-                                                stoploss_trigger_price = stoploss_price - 1
-
-                                            # Place target order
-                                            target_order = self.place_order_child(tag=parent_order_id, order_type='LIMIT', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=target_price)
-                                            self.logger.info('Placed target order for {instrument} and parent order id : {parent_order_id} : {target_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, target_order=target_order))
-
-                                            # Place stoploss order
-                                            stoploss_order = self.place_order_child(tag=parent_order_id, order_type='SLM', instrument=row['instrument'], transaction_type=transaction_type, quantity=parent_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
-                                            self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
+                            if stoploss_lag_quantity:
+                                stoploss_order = self.place_order_child(tag='stoploss', order_type='SLM', instrument=row['instrument'], transaction_type=transaction_type, quantity=stoploss_lag_quantity, price=stoploss_price, trigger_price=stoploss_trigger_price)
+                                self.logger.info('Placed stoploss order for {instrument} and parent order id : {parent_order_id} : {stoploss_order}'.format(instrument=row['instrument'], parent_order_id=parent_order_id, stoploss_order=stoploss_order))
                                         
                             self.logger.debug('Processed instrument {instrument} for placing child orders'.format(instrument=row['instrument']))
                         except Exception as ex:

@@ -18,6 +18,8 @@ class CompareMarket:
             self.logger.debug("Removing all past temporary files")
             if os.path.exists('trades_today.csv'):
                 os.remove("trades_today.csv")
+            if os.path.exists('rejected_trades_today.csv'):
+                os.remove("rejected_trades_today.csv")
             self.logger.info("Removed all past temporary files")
 
             try:
