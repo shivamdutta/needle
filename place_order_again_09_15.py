@@ -182,65 +182,67 @@ class PlaceOrderAgain:
             self.trades_today = pd.read_csv('trades_today.csv')
             self.logger.info("Loaded required files for placing orders again for rejected orders")
             
-            try:
-                self.logger.debug("Fetching all orders")
-                orders_placed = self.kite.orders()
-                orders_placed_df = pd.DataFrame(orders_placed)
-                self.logger.debug("Fetched all orders")
-            
+            if len(self.trades_today)>0:
+                
                 try:
-                    self.logger.debug("Placing orders again for rejected orders")
-                    rejected_orders_placed_df = orders_placed_df[orders_placed_df['status']=='REJECTED']
-                    rejected_orders_placed_df['instrument'] = 'NSE:' + rejected_orders_placed_df['tradingsymbol']
-                    instruments_to_trade = list(set(self.trades_today['instrument']).intersection(set(rejected_orders_placed_df['instrument'])))
-                    n_instruments_to_trade = len(instruments_to_trade)
-                    if n_instruments_to_trade:
-                        multithreading = True
-                        bracket = False
-                        if multithreading:
-                            pool = ThreadPool(n_instruments_to_trade)
-                            if bracket:
-                                orders = pool.map(self.place_order_bo, instruments_to_trade)
-                            else:
-                                orders = pool.map(self.place_order_regular, instruments_to_trade)
-                        else:
-                            orders = []
-                            for c in instruments_to_trade:
-                                if bracket:
-                                    order = self.place_order_bo(c)
-                                else:
-                                    order = self.place_order_regular(c)
-                                orders.append(order)
-                        orders_df = pd.DataFrame(orders)
-                    self.logger.info("Placed orders again for rejected orders")
+                    self.logger.debug("Fetching all orders")
+                    orders_placed = self.kite.orders()
+                    orders_placed_df = pd.DataFrame(orders_placed)
+                    self.logger.debug("Fetched all orders")
 
                     try:
-                        self.logger.debug("Saving updated files after placing orders again for rejected orders")
+                        self.logger.debug("Placing orders again for rejected orders")
+                        rejected_orders_placed_df = orders_placed_df[orders_placed_df['status']=='REJECTED']
+                        rejected_orders_placed_df['instrument'] = 'NSE:' + rejected_orders_placed_df['tradingsymbol']
+                        instruments_to_trade = list(set(self.trades_today['instrument']).intersection(set(rejected_orders_placed_df['instrument'])))
+                        n_instruments_to_trade = len(instruments_to_trade)
+                        if n_instruments_to_trade:
+                            multithreading = True
+                            bracket = False
+                            if multithreading:
+                                pool = ThreadPool(n_instruments_to_trade)
+                                if bracket:
+                                    orders = pool.map(self.place_order_bo, instruments_to_trade)
+                                else:
+                                    orders = pool.map(self.place_order_regular, instruments_to_trade)
+                            else:
+                                orders = []
+                                for c in instruments_to_trade:
+                                    if bracket:
+                                        order = self.place_order_bo(c)
+                                    else:
+                                        order = self.place_order_regular(c)
+                                    orders.append(order)
+                            orders_df = pd.DataFrame(orders)
+                        self.logger.info("Placed orders again for rejected orders")
 
-                        for instrument in instruments_to_trade:
+                        try:
+                            self.logger.debug("Saving updated files after placing orders again for rejected orders")
 
-                            order_status = orders_df[orders_df['instrument']==instrument].iloc[0]
+                            for instrument in instruments_to_trade:
 
-                            self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_id'] = order_status['order_id']
-                            self.trades_today.loc[self.trades_today['instrument']==instrument, 'timestamp'] = order_status['timestamp']
-                            self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_type'] = order_status['order_type']
+                                order_status = orders_df[orders_df['instrument']==instrument].iloc[0]
 
-                        self.trades_today.to_csv('trades_today.csv', index=False)
-                        self.logger.info("Saved updated files after placing orders again for rejected orders")
-                        self.mailer.send_mail('Needle : Orders Placed Again Successfully', "Trades Today : <br>" + self.trades_today.to_html())
+                                self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_id'] = order_status['order_id']
+                                self.trades_today.loc[self.trades_today['instrument']==instrument, 'timestamp'] = order_status['timestamp']
+                                self.trades_today.loc[self.trades_today['instrument']==instrument, 'order_type'] = order_status['order_type']
+
+                            self.trades_today.to_csv('trades_today.csv', index=False)
+                            self.logger.info("Saved updated files after placing orders again for rejected orders")
+                            self.mailer.send_mail('Needle : Orders Placed Again Successfully', "Trades Today : <br>" + self.trades_today.to_html())
+
+                        except Exception as ex:
+                            self.logger.error("Error in saving updated files after placing orders again for rejected orders : {}".format(ex))
+                            self.mailer.send_mail('Needle : Place Order Again Failure', "Error in saving updated files after placing orders again for rejected orders : {}".format(ex))
 
                     except Exception as ex:
-                        self.logger.error("Error in saving updated files after placing orders again for rejected orders : {}".format(ex))
-                        self.mailer.send_mail('Needle : Place Order Again Failure', "Error in saving updated files after placing orders again for rejected orders : {}".format(ex))
+                        self.logger.error('Error in placing orders : {}'.format(ex))
+                        self.mailer.send_mail('Needle : Place Order Again Failure', "Error in placing orders again for rejected orders : {}".format(ex))
 
                 except Exception as ex:
-                    self.logger.error('Error in placing orders : {}'.format(ex))
-                    self.mailer.send_mail('Needle : Place Order Again Failure', "Error in placing orders again for rejected orders : {}".format(ex))
-                
-            except Exception as ex:
-                self.logger.error("Error in fetching all orders : {}".format(ex))
-                self.mailer.send_mail('Needle : Place Order Again Failure', 'Error in fetching all orders : {}'.format(ex))
-                
+                    self.logger.error("Error in fetching all orders : {}".format(ex))
+                    self.mailer.send_mail('Needle : Place Order Again Failure', 'Error in fetching all orders : {}'.format(ex))
+
         except Exception as ex:
             self.logger.error('Error in loading required files for placing orders : {}'.format(ex))                
             self.mailer.send_mail('Needle : Place Order Again Failure', 'Error in loading required files for placing orders again for rejected orders : {}'.format(ex))
